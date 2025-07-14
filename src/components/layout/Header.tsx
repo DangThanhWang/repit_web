@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, BookOpen, ArrowRight, Sparkles } from "lucide-react";
+import { Menu, X, BookOpen, ArrowRight, Sparkles, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const navLinks = [
     { label: "Home", href: "/" },
@@ -16,197 +17,213 @@ export default function Header() {
     { label: "Contact", href: "/contact" },
   ];
 
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Disable scroll when menu is open
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
   return (
-    <header className="w-full sticky top-0 z-50">
-      {/* Premium Background with Multiple Layers */}
+    <header className={`w-full sticky top-0 z-50 transition-all duration-500 ${
+      scrolled ? "py-2" : "py-4"
+    }`}>
+      {/* Elegant Background */}
       <div className="absolute inset-0">
-        {/* Base gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-50/95 via-white/90 to-blue-50/95"></div>
-        
-        {/* Glass morphism layer */}
-        <div className="absolute inset-0 bg-white/25 backdrop-blur-2xl"></div>
-        
-        {/* Subtle accent gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-purple-500/5"></div>
-        
-        {/* Premium border and shadow */}
-        <div className="absolute inset-0 border-b border-white/40 shadow-2xl shadow-slate-900/10"></div>
-        
-        {/* Ambient light effect */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue-500/5"></div>
+        <div className={`absolute inset-0 transition-all duration-500 ${
+          scrolled 
+            ? "bg-white/95 backdrop-blur-xl shadow-lg" 
+            : "bg-gradient-to-b from-white/80 to-white/60 backdrop-blur-md"
+        }`}></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/[0.03] via-transparent to-indigo-500/[0.03]"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
       </div>
-      
-      <div className="relative container mx-auto flex h-24 items-center justify-between px-8 lg:px-12">
-        {/* Premium Logo Section */}
-        <Link href="/" className="flex items-center space-x-5 group">
-          <div className="relative">
-            {/* Enhanced Glassmorphic Icon Container */}
-            <div className="w-14 h-14 bg-gradient-to-br from-white/40 to-white/20 backdrop-blur-xl rounded-3xl flex items-center justify-center border border-white/50 shadow-2xl shadow-blue-500/20 group-hover:shadow-blue-500/30 transition-all duration-700 group-hover:scale-110 group-hover:rotate-3">
-              <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden">
-                <BookOpen className="w-6 h-6 text-white drop-shadow-lg relative z-10" />
-                {/* Inner glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl"></div>
+
+      <div className="relative container mx-auto px-6 lg:px-8">
+        <div className="flex items-center justify-between">
+          {/* Logo - Simplified and Elegant */}
+          <Link href="/" className="flex items-center space-x-4 group">
+            <div className="relative">
+              {/* Main Logo Container */}
+              <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 p-0.5 shadow-lg shadow-blue-600/20 group-hover:shadow-xl group-hover:shadow-blue-600/30 transition-all duration-300 group-hover:scale-105">
+                <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
+                  <BookOpen className="w-6 h-6 text-blue-600" strokeWidth={2.5} />
+                </div>
+              </div>
+              {/* Accent Badge */}
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                <Sparkles className="w-2.5 h-2.5 text-white" />
               </div>
             </div>
-            
-            {/* Premium Floating Accent */}
-            <div className="absolute -top-2 -right-2 w-5 h-5 bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 rounded-full shadow-lg shadow-amber-400/40 animate-pulse">
-              <Sparkles className="w-3 h-3 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                REPIT
+              </h1>
+              <p className="text-xs text-gray-500 font-medium tracking-wide">
+                Smart Learning Platform
+              </p>
             </div>
-            
-            {/* Ambient glow ring */}
-            <div className="absolute inset-0 w-14 h-14 bg-blue-400/20 rounded-full blur-xl group-hover:bg-blue-400/30 transition-all duration-700"></div>
-          </div>
-          
-          <div className="flex flex-col space-y-1">
-            <span className="text-3xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent tracking-tight leading-none">
-              REPIT
-            </span>
-            <span className="text-sm text-slate-600/80 font-semibold tracking-wider uppercase">
-              Learn. Practice. Master.
-            </span>
-          </div>
-        </Link>
+          </Link>
 
-        {/* Premium Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-3">
-          {navLinks.map((link, index) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="relative px-6 py-3.5 text-slate-700/90 hover:text-blue-600 font-semibold transition-all duration-500 rounded-2xl hover:bg-white/40 hover:backdrop-blur-xl hover:border hover:border-white/60 hover:shadow-xl hover:shadow-blue-500/10 group overflow-hidden"
+          {/* Desktop Navigation - Clean and Modern */}
+          <nav className="hidden lg:flex items-center space-x-1" aria-label="Main navigation">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="relative px-5 py-2.5 text-gray-700 hover:text-gray-900 font-medium transition-all duration-300 rounded-xl hover:bg-gray-100/70 group"
+              >
+                <span className="relative z-10">{link.label}</span>
+                {/* Subtle Underline Animation */}
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-300 group-hover:w-3/4"></div>
+              </Link>
+            ))}
+          </nav>
+
+          {/* Desktop Actions - Professional CTAs */}
+          <div className="hidden lg:flex items-center space-x-4">
+            <Button 
+              variant="ghost" 
+              className="text-gray-700 hover:text-gray-900 font-medium px-5 py-2.5 h-auto rounded-xl hover:bg-gray-100/70 transition-all duration-300"
             >
-              {/* Background shimmer effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              
-              {/* Text */}
-              <span className="relative z-10">{link.label}</span>
-              
-              {/* Premium underline effect */}
-              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
-                <div className="w-0 h-0.5 bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500 rounded-full transition-all duration-500 group-hover:w-8 shadow-lg shadow-blue-500/50"></div>
-                <div className="w-0 h-0.5 bg-white/60 rounded-full transition-all duration-500 group-hover:w-6 mt-0.5 blur-sm"></div>
-              </div>
-            </Link>
-          ))}
-        </nav>
+              Sign In
+            </Button>
+            <Button className="relative bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium px-6 py-2.5 h-auto rounded-xl shadow-md hover:shadow-lg transition-all duration-300 group overflow-hidden">
+              <span className="relative z-10 flex items-center gap-2">
+                Get Started
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+              </span>
+              {/* Shine Effect */}
+              <div className="absolute inset-0 -top-1/2 -left-1/2 w-[200%] h-[200%] rotate-45 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 translate-x-[-100%] group-hover:translate-x-[100%]"></div>
+            </Button>
+          </div>
 
-        {/* Premium Desktop CTA Buttons */}
-        <div className="hidden md:flex items-center space-x-5">
-          <Button 
-            variant="ghost" 
-            className="text-slate-700/80 hover:text-slate-900 font-semibold px-6 py-3 rounded-2xl hover:bg-white/40 hover:backdrop-blur-xl hover:border hover:border-white/60 hover:shadow-lg transition-all duration-500 relative group overflow-hidden"
+          {/* Mobile Menu Button - Refined */}
+          <button
+            className="lg:hidden relative w-10 h-10 rounded-xl bg-gray-100/70 hover:bg-gray-100 transition-all duration-300 flex items-center justify-center group"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
           >
-            <span className="relative z-10">Sign In</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-          </Button>
-          
-          <Button className="relative bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-700 hover:via-blue-600 hover:to-indigo-700 text-white font-bold px-8 py-4 rounded-2xl shadow-2xl shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-500 hover:scale-105 border border-white/30 backdrop-blur-sm group overflow-hidden transform hover:-translate-y-0.5">
-            {/* Background gradient animation */}
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            
-            {/* Shimmer effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-            
-            <span className="relative z-10 flex items-center">
-              Get Started
-              <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 group-hover:scale-110 transition-all duration-300" />
-            </span>
-            
-            {/* Inner glow */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          </Button>
+            <div className="relative w-6 h-6">
+              <motion.div
+                animate={{ 
+                  rotate: menuOpen ? 45 : 0,
+                  y: menuOpen ? 0 : -8
+                }}
+                transition={{ duration: 0.3 }}
+                className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-700 rounded-full"
+              />
+              <motion.div
+                animate={{ 
+                  opacity: menuOpen ? 0 : 1,
+                  x: menuOpen ? 20 : 0
+                }}
+                transition={{ duration: 0.3 }}
+                className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-700 rounded-full"
+              />
+              <motion.div
+                animate={{ 
+                  rotate: menuOpen ? -45 : 0,
+                  y: menuOpen ? 0 : 8
+                }}
+                transition={{ duration: 0.3 }}
+                className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-700 rounded-full"
+              />
+            </div>
+          </button>
         </div>
-
-        {/* Premium Mobile Menu Button */}
-        <button
-          className="md:hidden p-4 rounded-2xl bg-white/30 backdrop-blur-xl border border-white/50 hover:bg-white/40 hover:border-white/60 transition-all duration-500 shadow-xl shadow-black/10 hover:shadow-2xl hover:scale-105 group"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
-        >
-          <motion.div
-            animate={{ rotate: menuOpen ? 180 : 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="relative"
-          >
-            {menuOpen ? (
-              <X className="w-7 h-7 text-slate-700 group-hover:text-blue-600 transition-colors duration-300" />
-            ) : (
-              <Menu className="w-7 h-7 text-slate-700 group-hover:text-blue-600 transition-colors duration-300" />
-            )}
-          </motion.div>
-        </button>
       </div>
 
-      {/* Premium Mobile Menu */}
+      {/* Mobile Menu - Clean Slide */}
       <AnimatePresence>
         {menuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0, y: -20 }}
-            animate={{ height: "auto", opacity: 1, y: 0 }}
-            exit={{ height: 0, opacity: 0, y: -20 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="md:hidden absolute top-full left-0 right-0 overflow-hidden"
-          >
-            {/* Premium Mobile Background */}
-            <div className="absolute inset-0">
-              <div className="absolute inset-0 bg-gradient-to-b from-slate-50/95 to-white/90"></div>
-              <div className="absolute inset-0 bg-white/30 backdrop-blur-2xl"></div>
-              <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-purple-500/10"></div>
-              <div className="absolute inset-0 border-t border-white/50 shadow-2xl shadow-slate-900/20"></div>
-            </div>
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm lg:hidden"
+              onClick={() => setMenuOpen(false)}
+            />
             
-            <div className="relative px-8 py-8 space-y-3">
-              {navLinks.map((link, index) => (
-                <motion.div
-                  key={link.href}
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: index * 0.1, duration: 0.4 }}
-                  className="relative"
+            {/* Menu Panel */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl lg:hidden"
+            >
+              {/* Menu Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                <Link href="/" className="flex items-center space-x-3" onClick={() => setMenuOpen(false)}>
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 p-0.5">
+                    <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
+                      <BookOpen className="w-5 h-5 text-blue-600" strokeWidth={2.5} />
+                    </div>
+                  </div>
+                  <span className="text-xl font-bold text-gray-900">REPIT</span>
+                </Link>
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors duration-300 flex items-center justify-center"
                 >
-                  <Link
-                    href={link.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center px-6 py-4 text-slate-700/90 hover:text-blue-600 hover:bg-white/40 font-semibold rounded-2xl transition-all duration-500 backdrop-blur-sm border border-transparent hover:border-white/60 hover:shadow-xl hover:shadow-blue-500/10 group relative overflow-hidden"
+                  <X className="w-5 h-5 text-gray-700" />
+                </button>
+              </div>
+
+              {/* Menu Items */}
+              <nav className="p-6 space-y-2">
+                {navLinks.map((link, index) => (
+                  <motion.div
+                    key={link.href}
+                    initial={{ x: 50, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: index * 0.1 }}
                   >
-                    <span className="relative z-10">{link.label}</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                    <ArrowRight className="w-5 h-5 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
-                  </Link>
-                </motion.div>
-              ))}
-              
-              {/* Premium Mobile CTA Buttons */}
-              <motion.div
-                initial={{ x: -50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: navLinks.length * 0.1, duration: 0.4 }}
-                className="pt-6 border-t border-white/30 space-y-4"
-              >
+                    <Link
+                      href={link.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center justify-between px-4 py-3 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-300 group"
+                    >
+                      <span className="font-medium">{link.label}</span>
+                      <ChevronDown className="w-4 h-4 text-gray-400 -rotate-90 group-hover:translate-x-1 transition-transform duration-300" />
+                    </Link>
+                  </motion.div>
+                ))}
+              </nav>
+
+              {/* Menu Actions */}
+              <div className="absolute bottom-0 left-0 right-0 p-6 space-y-3 border-t border-gray-100 bg-white">
                 <Button 
                   variant="outline" 
-                  className="w-full justify-center font-semibold py-4 rounded-2xl bg-white/30 backdrop-blur-xl border-white/50 hover:bg-white/40 hover:border-white/60 transition-all duration-500 shadow-lg hover:shadow-xl group relative overflow-hidden"
+                  className="w-full font-medium py-3 h-auto rounded-xl border-gray-200 hover:bg-gray-50 transition-all duration-300"
                   onClick={() => setMenuOpen(false)}
                 >
-                  <span className="relative z-10">Sign In</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                  Sign In
                 </Button>
-                
                 <Button 
-                  className="w-full bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-700 hover:via-blue-600 hover:to-indigo-700 text-white font-bold py-4 rounded-2xl shadow-2xl shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-500 border border-white/30 backdrop-blur-sm group relative overflow-hidden hover:scale-105"
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3 h-auto rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
                   onClick={() => setMenuOpen(false)}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                  <span className="relative z-10 flex items-center justify-center">
-                    Get Started
-                    <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
-                  </span>
+                  Get Started
                 </Button>
-              </motion.div>
-            </div>
-          </motion.div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>
