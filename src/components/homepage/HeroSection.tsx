@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, easeOut } from "framer-motion";
 import { ArrowRight, Play, Sparkles, Trophy, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CountUp from "react-countup";
@@ -15,7 +15,7 @@ const HeroSection = () => {
       initial: "hidden",
       animate: "visible",
       variants,
-      transition: { duration: 0.8, ease: "easeOut", delay },
+      transition: { duration: 0.8, ease: easeOut, delay },
     };
   };
 

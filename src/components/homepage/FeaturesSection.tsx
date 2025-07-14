@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, easeOut } from "framer-motion";
 import { 
   BookOpen, 
   TrendingUp, 
@@ -41,7 +41,7 @@ const FeaturesSection = () => {
   const fadeInScale = {
     initial: { opacity: 0, scale: 0.8 },
     animate: { opacity: 1, scale: 1 },
-    transition: { duration: 0.6, ease: "easeOut" }
+    transition: { duration: 0.6, ease: easeOut }
   };
 
   const staggerContainer = {
@@ -62,7 +62,7 @@ const FeaturesSection = () => {
           initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: 0.6, ease: [0.0, 0.0, 0.58, 1.0] }}
         >
           <h2 className="text-4xl lg:text-6xl font-bold mb-6">
             <span className="bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
