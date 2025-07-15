@@ -4,6 +4,7 @@ import { motion, easeOut } from "framer-motion";
 import { ArrowRight, BookOpen, Briefcase, Globe, MessageCircle, Plane, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import AnimatedBackground from "./AnimatedBackground";
 
 const FeaturedFlashcardSets = () => {
   const flashcardSets = [
@@ -79,6 +80,9 @@ const FeaturedFlashcardSets = () => {
 
   return (
     <section className="relative py-32 bg-gradient-to-b from-white via-slate-50/30 to-white">
+      {/* Animated Background */}
+      <AnimatedBackground variant="default" intensity="normal" />
+
       <div className="container mx-auto px-8 lg:px-12">
         <motion.div
           className="text-center mb-16"
