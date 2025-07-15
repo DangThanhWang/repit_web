@@ -29,7 +29,7 @@ export default function Homepage() {
       <FeaturedFlashcardSets />
 
       {/* Learning Progress (Only show if user is logged in) */}
-      {session && (
+      {/* {session && (
         <LearningProgress 
           userName={session.user?.name || "Learner"}
           wordsLearned={245}
@@ -37,7 +37,7 @@ export default function Homepage() {
           weeklyGoal={50}
           weeklyProgress={35}
         />
-      )}
+      )} */}
 
       {/* Testimonials Section */}
       <TestimonialsSection />

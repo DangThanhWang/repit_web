@@ -4,7 +4,7 @@ import { motion, easeOut } from "framer-motion";
 import { ArrowRight, BookOpen, Briefcase, Globe, MessageCircle, Plane, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import AnimatedBackground from "./AnimatedBackground";
+import AnimatedBackground from "../common/AnimatedBackground";
 
 const FeaturedFlashcardSets = () => {
   const flashcardSets = [

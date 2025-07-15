@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CountUp from "react-countup";
-import AnimatedBackground from "./AnimatedBackground";
+import AnimatedBackground from "../common/AnimatedBackground";
 
 interface LearningProgressProps {
   userName?: string;

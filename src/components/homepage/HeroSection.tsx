@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Play, ArrowRight, BookOpen, Star, Globe, Brain, Sparkles, Zap, Target, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import AnimatedBackground from "./AnimatedBackground"; // Import component
+import AnimatedBackground from "../common/AnimatedBackground"; // Import component
 
 const HeroSection = () => {
   return (

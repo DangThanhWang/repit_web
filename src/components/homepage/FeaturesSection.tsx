@@ -9,7 +9,7 @@ import {
   Layers,
   Cloud
 } from "lucide-react";
-import AnimatedBackground from "./AnimatedBackground";
+import AnimatedBackground from "../common/AnimatedBackground";
 
 const FeaturesSection = () => {
   const features = [

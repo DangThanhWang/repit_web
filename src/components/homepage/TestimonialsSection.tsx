@@ -3,7 +3,7 @@
 import { motion, easeOut } from "framer-motion";
 import { Star, Quote } from "lucide-react";
 import Image from "next/image";
-import AnimatedBackground from "./AnimatedBackground";
+import AnimatedBackground from "../common/AnimatedBackground";
 
 const TestimonialsSection = () => {
   const testimonials = [
