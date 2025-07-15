@@ -1,18 +1,26 @@
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth"; // file cấu hình next-auth
+import { authOptions } from "@/lib/auth";
 import WelcomeBanner from "@/components/dashboard/WelcomeBanner";
 import LearningProgressCard from "@/components/dashboard/LearningProgressCard";
 import MyFlashcardSets from "@/components/dashboard/MyFlashcardSets";
 import JoinedClasses from "@/components/dashboard/JoinedClasses";
 import RecommendedContent from "@/components/dashboard/RecommendedContent";
+import AnimatedBackground from "@/components/common/AnimatedBackground";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    // Redirect hoặc trả về component yêu cầu đăng nhập
-    return <div className="p-8">Please sign in to view your dashboard.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center relative">
+        <AnimatedBackground variant="default" intensity="heavy" />
+        <div className="relative z-10 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
+          <p className="text-gray-600">Please sign in to view your dashboard.</p>
+        </div>
+      </div>
+    );
   }
 
   const userId = session.user.id;
@@ -57,42 +65,59 @@ export default async function DashboardPage() {
   // Recommended content: ví dụ lấy 2 bộ thẻ gần đây nhất
   const recommended = await prisma.flashcardSet.findMany({
     orderBy: { createdAt: "desc" },
-    take: 2,
+    take: 3,
   });
 
   return (
-    <main className="container mx-auto px-4 py-8 space-y-8">
-      <WelcomeBanner userName={session.user.name || "Learner"} />
+    <main className="relative min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
+      {/* Animated Background */}
+      <AnimatedBackground variant="default" intensity="normal" />
+      
+      {/* Main Content */}
+      <div className="relative z-10 container mx-auto px-6 lg:px-8 py-12 space-y-12">
+        {/* Welcome Banner */}
+        <WelcomeBanner userName={session.user.name || "Learner"} />
 
-      <div className="grid md:grid-cols-3 gap-6">
-        <LearningProgressCard
-          wordsLearned={totalLearned}
-          streakDays={3} // tuỳ bạn có logic streak riêng
-          weeklyGoal={50}
-          weeklyProgress={15}
-        />
+        {/* Stats Overview Grid */}
+        <div className="grid lg:grid-cols-4 gap-8">
+          {/* Learning Progress - Takes up 2 columns */}
+          <div className="lg:col-span-2">
+            <LearningProgressCard
+              wordsLearned={totalLearned}
+              streakDays={7} // You can implement streak logic
+              weeklyGoal={50}
+              weeklyProgress={Math.min(totalLearned, 50)}
+            />
+          </div>
 
-        <JoinedClasses
-          classes={joinedClasses}
-        />
+          {/* Quick Stats */}
+          <div className="space-y-8">
+            <JoinedClasses classes={joinedClasses} />
+          </div>
 
-        <RecommendedContent
-          flashcards={recommended.map((set) => ({
-            id: set.id,
-            title: set.title,
-            cards: set.cardCount,
-          }))}
-        />
+          <div className="space-y-8">
+            <RecommendedContent
+              flashcards={recommended.map((set) => ({
+                id: set.id,
+                title: set.title,
+                cards: set.cardCount,
+              }))}
+            />
+          </div>
+        </div>
+
+        {/* My Flashcard Sets - Full Width */}
+        <div className="w-full">
+          <MyFlashcardSets
+            sets={flashcardSets.map((set) => ({
+              id: set.id,
+              title: set.title,
+              cards: set.flashcards.length,
+              progress: set.progress,
+            }))}
+          />
+        </div>
       </div>
-
-      <MyFlashcardSets
-        sets={flashcardSets.map((set) => ({
-          id: set.id,
-          title: set.title,
-          cards: set.flashcards.length,
-          progress: set.progress,
-        }))}
-      />
     </main>
   );
 }
