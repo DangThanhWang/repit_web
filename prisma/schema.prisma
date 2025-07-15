@@ -3,37 +3,40 @@ generator client {
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  directUrl  = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id            String   @id @default(cuid())
-  name          String?
-  email         String   @unique
-  emailVerified DateTime?
-  password      String
-  image         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  accounts      Account[]
-  sessions      Session[]
+  id                String              @id @default(cuid())
+  name              String?
+  email             String              @unique
+  emailVerified     DateTime?
+  password          String
+  image             String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  accounts          Account[]
+  sessions          Session[]
+  flashcardSets     FlashcardSet[]
+  flashcardProgress FlashcardProgress[]
+  memberships       Membership[]
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id])
 
@@ -55,4 +58,63 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model FlashcardSet {
+  id          String              @id @default(cuid())
+  title       String
+  description String?
+  cardCount   Int                 @default(0)
+  progress    Int                 @default(0)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  userId      String
+  user        User                @relation(fields: [userId], references: [id])
+  flashcards  Flashcard[]
+  progresses  FlashcardProgress[]
+}
+
+model Flashcard {
+  id        String       @id @default(cuid())
+  question  String
+  answer    String
+  example   String?
+  createdAt DateTime     @default(now())
+  setId     String
+  set       FlashcardSet @relation(fields: [setId], references: [id])
+}
+
+model FlashcardProgress {
+  id           String   @id @default(cuid())
+  userId       String
+  setId        String
+  learned      Int      @default(0)
+  lastReviewed DateTime @default(now())
+
+  user User         @relation(fields: [userId], references: [id])
+  set  FlashcardSet @relation(fields: [setId], references: [id])
+
+  @@unique([userId, setId])
+}
+
+model Course {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  memberships Membership[]
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  role      String   @default("member")
+  joinedAt  DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
 }

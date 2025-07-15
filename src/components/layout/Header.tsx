@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, BookOpen, ArrowRight, Sparkles, ChevronDown, User, LogOut, Settings } from "lucide-react";
+import { Menu, X, BookOpen, ArrowRight, Sparkles, ChevronDown, User, LogOut, Settings, Flame } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Header() {
@@ -13,12 +13,34 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const { data: session, status } = useSession();
 
-  const navLinks = [
-    { label: "Home", href: "/" },
-    { label: "Flashcards", href: "/flashcards" },
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
+  // Navigation links for unauthenticated users
+  const guestNavLinks = [
+    { label: "Home", href: "/", icon: undefined, highlight: false },
+    { label: "Flashcards", href: "/flashcards", icon: undefined, highlight: false },
+    { label: "Community", href: "/community", icon: undefined, highlight: false },
+    { label: "About", href: "/about", icon: undefined, highlight: false },
+    { label: "Contact", href: "/contact", icon: undefined, highlight: false },
   ];
+
+  // Navigation links for authenticated users
+  const userNavLinks = [
+    { label: "Dashboard", href: "/dashboard", icon: undefined, highlight: false },
+    { label: "Flashcards", href: "/flashcards", icon: undefined, highlight: false },
+    { label: "Classes", href: "/classes", icon: undefined, highlight: false },
+    { label: "Community", href: "/community", icon: undefined, highlight: false },
+    { 
+      label: "Upgrade", 
+      href: "/upgrade", 
+      icon: Flame,
+      highlight: true 
+    },
+  ];
+
+  // Choose appropriate nav links based on authentication status
+  const navLinks = session ? userNavLinks : guestNavLinks;
+  
+  // Logo link based on authentication status
+  const logoHref = session ? "/dashboard" : "/";
 
   // Handle scroll effect
   useEffect(() => {
@@ -72,7 +94,7 @@ export default function Header() {
       <div className="relative container mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-4 group">
+          <Link href={logoHref} className="flex items-center space-x-4 group">
             <div className="relative">
               <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 p-0.5 shadow-lg shadow-blue-600/20 group-hover:shadow-xl group-hover:shadow-blue-600/30 transition-all duration-300 group-hover:scale-105">
                 <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
@@ -95,16 +117,34 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-1" aria-label="Main navigation">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="relative px-5 py-2.5 text-gray-700 hover:text-gray-900 font-medium transition-all duration-300 rounded-xl hover:bg-gray-100/70 group"
-              >
-                <span className="relative z-10">{link.label}</span>
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-300 group-hover:w-3/4"></div>
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const IconComponent = link.icon;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative px-5 py-2.5 font-medium transition-all duration-300 rounded-xl group flex items-center gap-2 ${
+                    link.highlight 
+                      ? "text-orange-600 hover:text-orange-700 hover:bg-orange-50" 
+                      : "text-gray-700 hover:text-gray-900 hover:bg-gray-100/70"
+                  }`}
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    {link.label}
+                    {IconComponent && (
+                      <IconComponent className={`w-4 h-4 ${
+                        link.highlight ? "text-orange-500" : ""
+                      }`} />
+                    )}
+                  </span>
+                  <div className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 rounded-full transition-all duration-300 group-hover:w-3/4 ${
+                    link.highlight 
+                      ? "bg-gradient-to-r from-orange-500 to-red-500"
+                      : "bg-gradient-to-r from-blue-500 to-indigo-500"
+                  }`}></div>
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Desktop Actions */}
@@ -158,7 +198,7 @@ export default function Header() {
                         className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors w-full text-left"
                       >
                         <LogOut className="w-4 h-4" />
-                        Sign Out
+                        Logout
                       </button>
                     </motion.div>
                   )}
@@ -245,7 +285,7 @@ export default function Header() {
               className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl lg:hidden"
             >
               <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                <Link href="/" className="flex items-center space-x-3" onClick={() => setMenuOpen(false)}>
+                <Link href={logoHref} className="flex items-center space-x-3" onClick={() => setMenuOpen(false)}>
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 p-0.5">
                     <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
                       <BookOpen className="w-5 h-5 text-blue-600" strokeWidth={2.5} />
@@ -262,23 +302,37 @@ export default function Header() {
               </div>
 
               <nav className="p-6 space-y-2">
-                {navLinks.map((link, index) => (
-                  <motion.div
-                    key={link.href}
-                    initial={{ x: 50, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Link
-                      href={link.href}
-                      onClick={() => setMenuOpen(false)}
-                      className="flex items-center justify-between px-4 py-3 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-300 group"
+                {navLinks.map((link, index) => {
+                  const IconComponent = link.icon;
+                  return (
+                    <motion.div
+                      key={link.href}
+                      initial={{ x: 50, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: index * 0.1 }}
                     >
-                      <span className="font-medium">{link.label}</span>
-                      <ChevronDown className="w-4 h-4 text-gray-400 -rotate-90 group-hover:translate-x-1 transition-transform duration-300" />
-                    </Link>
-                  </motion.div>
-                ))}
+                      <Link
+                        href={link.href}
+                        onClick={() => setMenuOpen(false)}
+                        className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group ${
+                          link.highlight 
+                            ? "text-orange-600 hover:text-orange-700 hover:bg-orange-50" 
+                            : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                        }`}
+                      >
+                        <span className="font-medium flex items-center gap-2">
+                          {link.label}
+                          {IconComponent && (
+                            <IconComponent className={`w-4 h-4 ${
+                              link.highlight ? "text-orange-500" : ""
+                            }`} />
+                          )}
+                        </span>
+                        <ChevronDown className="w-4 h-4 text-gray-400 -rotate-90 group-hover:translate-x-1 transition-transform duration-300" />
+                      </Link>
+                    </motion.div>
+                  );
+                })}
               </nav>
 
               <div className="absolute bottom-0 left-0 right-0 p-6 space-y-3 border-t border-gray-100 bg-white">
@@ -293,12 +347,27 @@ export default function Header() {
                         <p className="text-xs text-gray-500">{session.user?.email}</p>
                       </div>
                     </div>
+                    <div className="space-y-2">
+                      <Link href="/profile" onClick={() => setMenuOpen(false)}>
+                        <Button variant="outline" className="w-full justify-start font-medium py-3 h-auto rounded-xl border-gray-200 hover:bg-gray-50 transition-all duration-300">
+                          <User className="w-4 h-4 mr-2" />
+                          Profile
+                        </Button>
+                      </Link>
+                      <Link href="/settings" onClick={() => setMenuOpen(false)}>
+                        <Button variant="outline" className="w-full justify-start font-medium py-3 h-auto rounded-xl border-gray-200 hover:bg-gray-50 transition-all duration-300">
+                          <Settings className="w-4 h-4 mr-2" />
+                          Settings
+                        </Button>
+                      </Link>
+                    </div>
                     <Button
                       onClick={handleSignOut}
                       variant="outline"
-                      className="w-full font-medium py-3 h-auto rounded-xl border-gray-200 hover:bg-gray-50 transition-all duration-300"
+                      className="w-full justify-start font-medium py-3 h-auto rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-all duration-300"
                     >
-                      Sign Out
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Logout
                     </Button>
                   </div>
                 ) : (

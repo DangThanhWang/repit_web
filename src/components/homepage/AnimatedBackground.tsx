@@ -205,7 +205,7 @@ const AnimatedBackground = ({
       /> */}
 
       {/* Additional Morphing Shapes */}
-      {/* <motion.div
+      <motion.div
         animate={{
           borderRadius: ["30% 70% 70% 30% / 30% 30% 70% 70%", 
                        "70% 30% 30% 70% / 70% 70% 30% 30%",
@@ -219,7 +219,7 @@ const AnimatedBackground = ({
           ease: "easeInOut"
         }}
         className={`absolute top-3/4 left-3/4 w-24 h-24 bg-gradient-to-br ${colors.shape3} backdrop-blur-sm`}
-      /> */}
+      />
 
       {/* Pulsing Dots */}
       {/* {[...Array(4)].map((_, i) => (

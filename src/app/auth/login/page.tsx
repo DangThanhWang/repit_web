@@ -49,7 +49,7 @@ export default function LoginPage() {
       } else if (result?.ok) {
         // Refresh the session and redirect
         await getSession();
-        router.push("/");
+        router.push("/dashboard");
         router.refresh();
       }
     } catch (error) {
