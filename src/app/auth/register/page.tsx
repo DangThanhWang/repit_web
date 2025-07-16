@@ -121,7 +121,7 @@ export default function RegisterPage() {
       {/* Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50"></div>
-        <div className="absolute inset-0 bg-white/60 backdrop-blur-3xl"></div>
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-3xl"></div>
       </div>
 
       <motion.div

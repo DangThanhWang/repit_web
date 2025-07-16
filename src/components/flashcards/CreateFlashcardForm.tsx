@@ -181,7 +181,7 @@ export default function CreateFlashcardForm({ userId }: CreateFlashcardFormProps
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Set Details */}
         <motion.div variants={fadeInUp}>
-          <Card className="bg-white/60 backdrop-blur-sm border-white/40 shadow-lg">
+          <Card className="bg-white/80 backdrop-blur-sm border-white/40 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
@@ -266,7 +266,7 @@ export default function CreateFlashcardForm({ userId }: CreateFlashcardFormProps
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="bg-white/60 backdrop-blur-sm border-white/40 shadow-lg">
+                <Card className="bg-white/80 backdrop-blur-sm border-white/40 shadow-lg">
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg flex items-center gap-2">
