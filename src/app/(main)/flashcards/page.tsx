@@ -1,54 +1,96 @@
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { BookOpen, ArrowRight } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
-export default async function FlashcardsListPage() {
-  const flashcards = await prisma.flashcardSet.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 20, // Lấy 20 bộ gần nhất
+export default async function FlashcardsPage() {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.email) {
+    return (
+      <div className="max-w-2xl mx-auto p-8 text-center">
+        <h1 className="text-2xl font-bold mb-4">Danh sách Flashcards</h1>
+        <p className="text-slate-600 mb-6">
+          Bạn cần đăng nhập để xem các bộ flashcard của mình.
+        </p>
+        <Link href="/auth/login">
+          <Button>Đăng nhập</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
     include: {
-      user: true,
+      flashcardSets: {
+        orderBy: { createdAt: "desc" },
+      },
     },
   });
 
+  const sets = user?.flashcardSets ?? [];
+
   return (
-    <div className="max-w-5xl mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-6">Tất cả bộ Flashcards</h1>
-
-      {flashcards.length === 0 && (
-        <p className="text-gray-600">Chưa có bộ flashcards nào.</p>
-      )}
-
-      <div className="grid md:grid-cols-2 gap-6">
-        {flashcards.map((set) => (
-          <div
-            key={set.id}
-            className="border rounded-xl p-4 shadow-sm hover:shadow transition"
-          >
-            <h2 className="text-xl font-semibold mb-1">{set.title}</h2>
-            {set.description && (
-              <p className="text-gray-600 mb-2">{set.description}</p>
-            )}
-            <p className="text-sm text-gray-500 mb-4">
-              {set.cardCount} thẻ · Tạo bởi {set.user?.name || "Người dùng"}
-            </p>
-            <div className="flex gap-2">
-              <Link href={`/flashcards/${set.id}`}>
-                <button className="inline-flex items-center gap-1 text-blue-600 hover:underline text-sm">
-                  <BookOpen className="w-4 h-4" />
-                  Xem chi tiết
-                </button>
-              </Link>
-              <Link href={`/flashcards/${set.id}/review`}>
-                <button className="inline-flex items-center gap-1 text-green-600 hover:underline text-sm">
-                  Bắt đầu ôn tập
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </Link>
-            </div>
-          </div>
-        ))}
+    <div className="max-w-4xl mx-auto p-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Tất cả Flashcards của bạn</h1>
+        <Link href="/flashcards/new">
+          <Button>
+            <BookOpen className="w-4 h-4 mr-2" />
+            Tạo bộ mới
+          </Button>
+        </Link>
       </div>
+
+      {sets.length === 0 ? (
+        <div className="text-center py-16">
+          <p className="text-slate-600 mb-4">
+            Bạn chưa có bộ flashcard nào. Hãy tạo bộ đầu tiên!
+          </p>
+          <Link href="/flashcards/new">
+            <Button>
+              <BookOpen className="w-4 h-4 mr-2" />
+              Tạo flashcard set
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {sets.map((set) => {
+            const percentage = set.cardCount === 0
+              ? 0
+              : Math.round((set.progress / 100) * 100);
+
+            return (
+              <Link
+                key={set.id}
+                href={`/flashcards/${set.id}`}
+                className="block border border-slate-200 rounded-xl p-5 hover:shadow transition"
+              >
+                <h2 className="text-xl font-semibold mb-1">{set.title}</h2>
+                {set.description && (
+                  <p className="text-slate-600 text-sm mb-3">{set.description}</p>
+                )}
+                <p className="text-slate-500 text-sm mb-3">
+                  {set.cardCount} thẻ
+                </p>
+                <Progress value={percentage} />
+                <div className="mt-2 text-sm text-slate-600">
+                  Tiến độ: {percentage}%
+                </div>
+                <div className="mt-3 flex items-center text-blue-600 font-medium text-sm">
+                  Xem chi tiết
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
