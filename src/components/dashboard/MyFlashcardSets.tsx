@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { motion, easeOut } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Plus, BookOpen, BarChart3, PlayCircle, Settings, Trash2, ArrowRight, Target } from "lucide-react";
+import { Plus, BookOpen, BarChart3, PlayCircle, Settings, Trash2, ArrowRight, Target, Pencil } from "lucide-react";
 import AnimatedBackground from "../common/AnimatedBackground";
 
 export default function MyFlashcardSets({
@@ -52,12 +53,15 @@ export default function MyFlashcardSets({
               </p>
             </div>
             
-            <Button 
-              className="group bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
-            >
-              <Plus className="w-5 h-5 mr-3 group-hover:rotate-90 transition-transform duration-300" />
-              Create New Set
-            </Button>
+            <Link href="/flashcards/new">
+              <Button 
+                className="group bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                <Plus className="w-5 h-5 mr-3 group-hover:rotate-90 transition-transform duration-300" />
+                Create New Set
+              </Button>
+            </Link>
+
           </motion.div>
 
           {/* Sets Content */}
@@ -103,9 +107,11 @@ export default function MyFlashcardSets({
                       {/* Set Header */}
                       <div className="flex items-start justify-between mb-6">
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-slate-800 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                            {set.title}
-                          </h3>
+                          <Link href={`/flashcards/${set.id}`} className="group-hover:text-blue-600 transition-colors">
+                            <h3 className="text-xl font-bold mb-2 line-clamp-2 cursor-pointer">
+                              {set.title}
+                            </h3>
+                          </Link>
                           <div className="flex items-center space-x-4 text-sm text-slate-600">
                             <span className="flex items-center space-x-1">
                               <BookOpen className="w-4 h-4" />
@@ -119,11 +125,17 @@ export default function MyFlashcardSets({
                         </div>
                         
                         {/* Quick Actions */}
-                        <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                        <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-auto z-10">
+                          {/* <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
                             <Settings className="w-4 h-4 text-slate-500" />
-                          </button>
-                          <button className="p-2 hover:bg-red-50 rounded-lg transition-colors">
+                          </button> */}
+                          <button
+                            onClick={() => {
+                              // TODO: Thêm confirm delete
+                              alert("Bạn muốn xóa bộ flashcard này?");
+                            }}
+                            className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                          >
                             <Trash2 className="w-4 h-4 text-red-500" />
                           </button>
                         </div>
@@ -165,24 +177,30 @@ export default function MyFlashcardSets({
 
                       {/* Action Buttons */}
                       <div className="flex gap-3">
-                        <Button 
-                          size="sm" 
-                          className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3 rounded-xl transition-all duration-300"
-                        >
-                          <PlayCircle className="w-4 h-4 mr-2" />
-                          Review
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          className="px-4 py-3 rounded-xl border-slate-300 hover:bg-slate-50 font-medium transition-all duration-300"
-                        >
-                          Edit
-                        </Button>
+                        <Link href={`/flashcards/${set.id}/review`} className="flex-1">
+                          <Button
+                            size="sm"
+                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3 rounded-xl transition-all duration-300"
+                          >
+                            <PlayCircle className="w-4 h-4 mr-2" />
+                            Review
+                          </Button>
+                        </Link>
+                        <Link href={`/flashcards/${set.id}/edit`}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="px-4 py-3 rounded-xl border-slate-300 hover:bg-slate-50 font-medium transition-all duration-300"
+                          >
+                            <Pencil className="w-4 h-4 mr-2" />
+                            Edit
+                          </Button>
+                        </Link>
                       </div>
 
+
                       {/* Progress Ring Indicator */}
-                      <div className="absolute top-6 right-6">
+                      <div className="absolute top-6 right-6 group-hover:opacity-0">
                         <div className="w-10 h-10 relative">
                           <svg className="w-10 h-10 transform -rotate-90" viewBox="0 0 40 40">
                             <circle
@@ -227,16 +245,19 @@ export default function MyFlashcardSets({
                 variants={fadeInUp}
                 className="text-center"
               >
-                <Button 
-                  variant="outline" 
-                  className="group px-8 py-4 text-lg rounded-2xl bg-white/60 backdrop-blur-sm border-blue-300 hover:bg-blue-50 hover:border-blue-400 transition-all duration-300 font-semibold"
-                >
-                  <span className="flex items-center text-blue-700">
-                    <Plus className="w-5 h-5 mr-3 group-hover:rotate-90 transition-transform duration-300" />
-                    Create More Sets
-                    <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
-                  </span>
-                </Button>
+                <Link href="/flashcards">
+                  <Button 
+                    variant="outline" 
+                    className="group px-8 py-4 text-lg rounded-2xl bg-white/60 backdrop-blur-sm border-blue-300 hover:bg-blue-50 hover:border-blue-400 transition-all duration-300 font-semibold"
+                  >
+                    <span className="flex items-center text-blue-700">
+                      <Plus className="w-5 h-5 mr-3 group-hover:rotate-90 transition-transform duration-300" />
+                      See All Sets
+                      <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
+                    </span>
+                  </Button>
+                </Link>
+
               </motion.div>
             </>
           )}
