@@ -59,7 +59,7 @@ const FeaturesSection = () => {
       {/* <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 opacity-20 blur-3xl rounded-full animate-pulse"></div> */}
 
       {/* Animated Background */}
-      <AnimatedBackground variant="default" intensity="normal" />
+      {/* <AnimatedBackground variant="default" intensity="normal" /> */}
 
       <div className="relative container mx-auto px-8 lg:px-12">
         <motion.div

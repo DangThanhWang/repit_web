@@ -6,12 +6,14 @@ import FeaturedFlashcardSets from "@/components/homepage/FeaturedFlashcardSets";
 import LearningProgress from "@/components/homepage/LearningProgress";
 import TestimonialsSection from "@/components/homepage/TestimonialsSection";
 import { useSession } from "next-auth/react";
+import AnimatedBackground from "./common/AnimatedBackground";
 
 export default function Homepage() {
   const { data: session } = useSession();
 
   return (
     <div className="relative min-h-screen">
+      <AnimatedBackground variant="blue" intensity="light" />
       {/* Floating Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl animate-pulse"></div>

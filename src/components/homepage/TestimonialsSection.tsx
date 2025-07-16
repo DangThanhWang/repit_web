@@ -51,9 +51,9 @@ const TestimonialsSection = () => {
   };
 
   return (
-    <section className="relative py-32 bg-gradient-to-b from-white via-slate-50/50 to-white">
+    <section className="relative py-32 ">
       {/* Animated Background */}
-      <AnimatedBackground variant="default" intensity="normal" />
+      {/* <AnimatedBackground variant="default" intensity="normal" /> */}
 
       <div className="container mx-auto px-8 lg:px-12">
         <motion.div

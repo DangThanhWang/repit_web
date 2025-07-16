@@ -51,7 +51,7 @@ const LearningProgress = ({
       <div className="absolute -bottom-20 right-0 w-[400px] h-[400px] bg-gradient-to-br from-blue-400 to-cyan-400 opacity-20 blur-2xl rounded-full animate-pulse delay-1000"></div> */}
 
       {/* Animated Background */}
-      <AnimatedBackground variant="default" intensity="normal" />
+      {/* <AnimatedBackground variant="default" intensity="normal" /> */}
       
       <div className="container mx-auto px-8 lg:px-12">
         <motion.div

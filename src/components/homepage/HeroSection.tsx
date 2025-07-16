@@ -7,9 +7,9 @@ import AnimatedBackground from "../common/AnimatedBackground"; // Import compone
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden ">
       {/* Animated Background */}
-      <AnimatedBackground variant="default" intensity="normal" />
+      {/* <AnimatedBackground variant="default" intensity="normal" /> */}
 
       <div className="relative container mx-auto px-8 lg:px-12 grid lg:grid-cols-2 gap-20 items-center">
         {/* Left Content */}

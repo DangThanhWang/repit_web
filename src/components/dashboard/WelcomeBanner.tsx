@@ -1,9 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Flame, Star, TrendingUp, Target } from "lucide-react";
+import { motion, easeOut } from "framer-motion";
+import { ArrowRight, Sparkles, BookOpen, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import AnimatedBackground from "../common/AnimatedBackground";
 
 export default function WelcomeBanner({ userName }: { userName: string }) {
   const currentHour = new Date().getHours();
@@ -13,174 +12,97 @@ export default function WelcomeBanner({ userName }: { userName: string }) {
     return "Good evening";
   };
 
-  return (
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-2xl">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0">
-        <AnimatedBackground variant="blue" intensity="light" />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 via-indigo-600/90 to-purple-600/90"></div>
-      </div>
+  const fadeInUp = {
+    initial: { opacity: 0, y: 60 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6, ease: easeOut }
+  };
 
-      <div className="relative z-10 container mx-auto px-8 py-16 flex flex-col lg:flex-row items-center justify-between gap-8">
-        {/* Left Content */}
+  const staggerContainer = {
+    animate: {
+      transition: { staggerChildren: 0.15 }
+    }
+  };
+
+  return (
+    <section className="relative py-20 overflow-hidden rounded-3xl bg-gradient-to-br from-sky-500 via-indigo-600 to-purple-700">
+      {/* Subtle floating gradient blobs */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.3, scale: [1, 1.2, 1] }}
+        transition={{ repeat: Infinity, duration: 12, ease: "easeInOut" }}
+        className="absolute -top-20 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-400 to-purple-600 rounded-full blur-3xl"
+      />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.2, scale: [1, 1.3, 1] }}
+        transition={{ repeat: Infinity, duration: 15, ease: "easeInOut", delay: 3 }}
+        className="absolute -bottom-20 -right-20 w-96 h-96 bg-gradient-to-br from-blue-400 to-sky-500 rounded-full blur-3xl"
+      />
+
+      <div className="relative container mx-auto px-8 lg:px-12 text-center">
         <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="space-y-6 flex-1"
+          initial="initial"
+          animate="animate"
+          variants={staggerContainer}
         >
-          {/* Achievement Badge */}
+          {/* Badge */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="inline-flex items-center space-x-3 px-6 py-3 bg-white/20 backdrop-blur-md rounded-full border border-white/30 shadow-lg"
+            variants={fadeInUp}
+            className="inline-flex items-center space-x-3 px-6 py-3 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-lg mb-6"
           >
             <motion.div
               animate={{ rotate: [0, 360] }}
-              transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+              transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
             >
-              <Sparkles className="w-5 h-5 text-yellow-300" />
+              <Sparkles className="w-5 h-5 text-amber-400" />
             </motion.div>
-            <span className="text-sm font-semibold">
-              Learning Streak Active 🔥
+            <span className="text-sm font-medium text-white/90">
+              {getGreeting()}, {userName}!
             </span>
           </motion.div>
 
-          {/* Main Greeting */}
-          <div className="space-y-2">
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-lg text-white/80 font-medium"
-            >
-              {getGreeting()}!
-            </motion.p>
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="text-4xl lg:text-5xl font-black leading-tight"
-            >
-              Welcome back,{" "}
-              <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                {userName}
-              </span>
-            </motion.h1>
-          </div>
-
-          {/* Motivational Message */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="text-lg text-white/90 leading-relaxed max-w-xl"
+          {/* Title */}
+          <motion.h1
+            variants={fadeInUp}
+            className="text-4xl md:text-6xl font-extrabold tracking-tight text-white"
           >
-            Ready to continue your English mastery journey? Your consistency is paying off!
+            Ready to{" "}
+            <span className="bg-gradient-to-r from-amber-300 via-yellow-400 to-orange-400 bg-clip-text text-transparent">
+              Continue Learning?
+            </span>
+          </motion.h1>
+
+          {/* Description */}
+          <motion.p
+            variants={fadeInUp}
+            className="mt-4 text-lg md:text-xl text-white/80 max-w-2xl mx-auto"
+          >
+            Your English mastery journey continues with{" "}
+            <span className="text-white font-semibold">smart practice</span> and{" "}
+            <span className="text-white font-semibold">personalized lessons</span>.
           </motion.p>
 
-          {/* Quick Actions */}
+          {/* CTA */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1 }}
-            className="flex flex-col sm:flex-row gap-4 pt-4"
+            variants={fadeInUp}
+            className="mt-10 flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <Button className="group bg-white text-blue-600 hover:bg-gray-50 font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-              <span className="flex items-center">
-                Continue Learning
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-              </span>
+            <Button className="group relative bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:to-pink-600 text-white font-semibold px-8 py-4 rounded-2xl shadow-lg hover:shadow-pink-500/30 transition-all duration-300">
+              <BookOpen className="w-5 h-5 mr-2" />
+              Continue Learning
+              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
             </Button>
             <Button
               variant="outline"
-              className="border-2 border-white/30 text-white hover:bg-white/10 font-semibold px-8 py-4 rounded-xl backdrop-blur-sm transition-all duration-300 hover:scale-105"
+              className="px-8 py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 text-white font-semibold transition-all duration-300 backdrop-blur"
             >
-              View Progress
+              <Calendar className="w-5 h-5 mr-2" />
+              View Schedule
             </Button>
           </motion.div>
         </motion.div>
-
-        {/* Right Content - Stats Cards */}
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="space-y-6 lg:min-w-[300px]"
-        >
-          {/* Today's Goal */}
-          <div className="bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white/90 font-semibold">Today's Goal</h3>
-              <Target className="w-5 h-5 text-white/70" />
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-white/80 text-sm">Learn 10 new words</span>
-                <span className="text-white font-bold">7/10</span>
-              </div>
-              <div className="w-full bg-white/20 rounded-full h-2">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: "70%" }}
-                  transition={{ duration: 1.5, delay: 1.2 }}
-                  className="h-2 bg-gradient-to-r from-yellow-300 to-orange-300 rounded-full"
-                />
-              </div>
-              <p className="text-white/70 text-xs">You're almost there! 💪</p>
-            </div>
-          </div>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 gap-4">
-            <StatsCard
-              icon={<Flame className="w-5 h-5 text-orange-300" />}
-              label="Streak"
-              value="7 days"
-              delay={1.4}
-            />
-            <StatsCard
-              icon={<Star className="w-5 h-5 text-yellow-300" />}
-              label="Level"
-              value="Pro"
-              delay={1.6}
-            />
-          </div>
-        </motion.div>
       </div>
-
-      {/* Decorative Elements */}
-      <div className="absolute top-8 right-8 w-20 h-20 bg-white/10 rounded-full blur-2xl"></div>
-      <div className="absolute bottom-8 left-8 w-16 h-16 bg-yellow-300/20 rounded-full blur-xl"></div>
     </section>
-  );
-}
-
-// Stats Card Component
-function StatsCard({ 
-  icon, 
-  label, 
-  value, 
-  delay 
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  delay: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6, delay }}
-      className="bg-white/15 backdrop-blur-md border border-white/20 rounded-xl p-4 text-center hover:bg-white/20 transition-all duration-300"
-    >
-      <div className="flex justify-center mb-2">
-        {icon}
-      </div>
-      <p className="text-white font-bold text-lg">{value}</p>
-      <p className="text-white/70 text-xs uppercase tracking-wide">{label}</p>
-    </motion.div>
   );
 }

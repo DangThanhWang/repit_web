@@ -1,251 +1,307 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, easeInOut, easeOut } from "framer-motion";
+import { useEffect, useState, useMemo } from "react";
 
-const AnimatedBackground = ({ 
-  variant = "default",
-  intensity = "normal" 
-}: { 
-  variant?: "default" | "blue" | "purple" | "gradient";
+interface AnimatedBackgroundProps {
+  variant?: "default" | "blue" | "purple" | "gradient" | "warm" | "cool" | "sunset";
   intensity?: "light" | "normal" | "heavy";
-}) => {
-  const getColors = () => {
-    switch (variant) {
-      case "blue":
-        return {
-          shape1: "from-blue-400/20 to-indigo-500/20",
-          shape2: "from-cyan-400/20 to-blue-500/20", 
-          shape3: "from-indigo-400/20 to-blue-500/20",
-          particles: "from-blue-400 to-indigo-400"
-        };
-      case "purple":
-        return {
-          shape1: "from-purple-400/20 to-pink-500/20",
-          shape2: "from-indigo-400/20 to-purple-500/20",
-          shape3: "from-pink-400/20 to-purple-500/20", 
-          particles: "from-purple-400 to-pink-400"
-        };
-      case "gradient":
-        return {
-          shape1: "from-emerald-400/20 to-teal-500/20",
-          shape2: "from-orange-400/20 to-red-500/20",
-          shape3: "from-violet-400/20 to-purple-500/20",
-          particles: "from-emerald-400 to-violet-400"
-        };
-      default:
-        return {
-          shape1: "from-blue-400/20 to-indigo-500/20",
-          shape2: "from-purple-400/20 to-pink-500/20", 
-          shape3: "from-cyan-400/20 to-blue-500/20",
-          particles: "from-blue-400 to-indigo-400"
-        };
-    }
-  };
+  pattern?: "floating" | "morphing" | "spiral" | "wave" | "particles";
+  speed?: "slow" | "normal" | "fast";
+}
 
-  const getIntensitySettings = () => {
+interface Shape {
+  id: string;
+  top: string;
+  left: string;
+  size: number;
+  borderRadius: string;
+  duration: number;
+  delay: number;
+  animationType: "float" | "rotate" | "scale" | "morph" | "spiral";
+  opacity: number;
+  color: string;
+}
+
+export default function AnimatedBackground({
+  variant = "default",
+  intensity = "normal",
+  pattern = "floating",
+  speed = "normal",
+}: AnimatedBackgroundProps) {
+  const [mounted, setMounted] = useState(false);
+  const [shapes, setShapes] = useState<Shape[]>([]);
+
+  // Cấu hình số lượng shapes theo intensity
+  const getShapeCount = useMemo(() => {
     switch (intensity) {
       case "light":
-        return {
-          particleCount: 3,
-          animationSpeed: { base: 20, modifier: 4 },
-          opacity: "/10"
-        };
+        return 30;
       case "heavy":
-        return {
-          particleCount: 12,
-          animationSpeed: { base: 10, modifier: 2 },
-          opacity: "/30"
-        };
+        return 50;
       default:
+        return 12;
+    }
+  }, [intensity]);
+
+  // Cấu hình tốc độ animation
+  const getSpeedMultiplier = useMemo(() => {
+    switch (speed) {
+      case "slow":
+        return 1.5;
+      case "fast":
+        return 0.5;
+      default:
+        return 1;
+    }
+  }, [speed]);
+
+  // Định nghĩa color palette theo variant
+  const getColorPalette = useMemo(() => {
+    switch (variant) {
+      case "blue":
+        return [
+          "from-blue-400/20 to-indigo-500/20",
+          "from-cyan-400/15 to-blue-600/15",
+          "from-sky-300/25 to-blue-400/25",
+        ];
+      case "purple":
+        return [
+          "from-purple-400/20 to-pink-500/20",
+          "from-indigo-400/15 to-purple-600/15",
+          "from-violet-300/25 to-purple-400/25",
+        ];
+      case "warm":
+        return [
+          "from-orange-400/20 to-red-500/20",
+          "from-yellow-400/15 to-orange-600/15",
+          "from-pink-300/25 to-red-400/25",
+        ];
+      case "cool":
+        return [
+          "from-teal-400/20 to-cyan-500/20",
+          "from-emerald-400/15 to-teal-600/15",
+          "from-green-300/25 to-cyan-400/25",
+        ];
+      case "sunset":
+        return [
+          "from-orange-400/20 to-pink-500/20",
+          "from-yellow-400/15 to-orange-600/15",
+          "from-red-300/25 to-purple-400/25",
+        ];
+      case "gradient":
+        return [
+          "from-emerald-400/20 to-violet-500/20",
+          "from-blue-400/15 to-pink-600/15",
+          "from-cyan-300/25 to-purple-400/25",
+        ];
+      default:
+        return [
+          "from-blue-400/20 to-pink-400/20",
+          "from-purple-400/15 to-cyan-500/15",
+          "from-indigo-300/25 to-pink-400/25",
+        ];
+    }
+  }, [variant]);
+
+  // Generate random shapes với pattern-specific logic
+  const generateShapes = useMemo(() => {
+    const colors = getColorPalette;
+    const baseSpeed = getSpeedMultiplier;
+    
+    return Array.from({ length: getShapeCount }).map((_, i) => {
+      let animationType: Shape["animationType"] = "float";
+      
+      // Xác định loại animation dựa trên pattern
+      switch (pattern) {
+        case "morphing":
+          animationType = Math.random() > 0.5 ? "morph" : "scale";
+          break;
+        case "spiral":
+          animationType = "spiral";
+          break;
+        case "wave":
+          animationType = i % 2 === 0 ? "float" : "rotate";
+          break;
+        case "particles":
+          animationType = Math.random() > 0.3 ? "scale" : "float";
+          break;
+        default:
+          const types: Shape["animationType"][] = ["float", "rotate", "scale"];
+          animationType = types[Math.floor(Math.random() * types.length)];
+      }
+
+      return {
+        id: `shape-${i}`,
+        top: `${Math.random() * 100}%`,
+        left: `${Math.random() * 100}%`,
+        size: pattern === "particles" 
+          ? 60 + Math.random() * 30 
+          : 80 + Math.random() * 60,
+        borderRadius: pattern === "morphing" 
+          ? "30%" 
+          : Math.random() > 0.6 ? "50%" : `${20 + Math.random() * 30}%`,
+        duration: (8 + Math.random() * 12) * baseSpeed,
+        delay: Math.random() * 3,
+        animationType,
+        opacity: 0.3 + Math.random() * 0.4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      };
+    });
+  }, [getShapeCount, getSpeedMultiplier, getColorPalette, pattern]);
+
+  // Khởi tạo shapes chỉ trên client
+  useEffect(() => {
+    setMounted(true);
+    setShapes(generateShapes);
+  }, [generateShapes]);
+
+  // Tạo animation variants cho từng loại
+  const getAnimationVariants = (shape: Shape) => {
+    const baseAnimation = {
+      repeat: Infinity,
+      duration: shape.duration,
+      delay: shape.delay,
+      ease: easeInOut,
+    };
+
+    switch (shape.animationType) {
+      case "rotate":
         return {
-          particleCount: 6,
-          animationSpeed: { base: 15, modifier: 3 },
-          opacity: "/20"
+          animate: {
+            rotate: [0, 360],
+            scale: [1, 1.1, 1],
+          },
+          transition: baseAnimation,
+        };
+      
+      case "scale":
+        return {
+          animate: {
+            scale: [0.8, 1.2, 0.8],
+            opacity: [shape.opacity * 0.5, shape.opacity, shape.opacity * 0.5],
+          },
+          transition: baseAnimation,
+        };
+      
+      case "morph":
+        return {
+          animate: {
+            borderRadius: ["30%", "50%", "20%", "30%"],
+            scale: [1, 1.15, 0.9, 1],
+            rotate: [0, 90, 180, 270, 360],
+          },
+          transition: { ...baseAnimation, duration: shape.duration * 1.5 },
+        };
+      
+      case "spiral":
+        return {
+          animate: {
+            x: [0, 50, 0, -50, 0],
+            y: [0, -30, 0, 30, 0],
+            rotate: [0, 180, 360],
+            scale: [1, 1.2, 1],
+          },
+          transition: baseAnimation,
+        };
+      
+      default: // float
+        return {
+          animate: {
+            y: [-20, 20, -20],
+            x: [-10, 10, -10],
+            scale: [1, 1.05, 1],
+          },
+          transition: baseAnimation,
         };
     }
   };
 
-  const colors = getColors();
-  const settings = getIntensitySettings();
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-purple-50/30" />
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Large Floating Geometric Shapes */}
-      <motion.div
-        animate={{ 
-          y: [-20, 20, -20],
-          rotate: [0, 180, 360],
-          scale: [1, 1.1, 1]
-        }}
-        transition={{ 
-          repeat: Infinity, 
-          duration: settings.animationSpeed.base, 
-          ease: "easeInOut" 
-        }}
-        className={`absolute top-20 left-10 w-32 h-32 bg-gradient-to-br ${colors.shape1} rounded-3xl backdrop-blur-sm`}
-      />
+      {/* Gradient Background Base */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-white/10 to-purple-50/20" />
       
-      <motion.div
-        animate={{ 
-          y: [20, -20, 20],
-          rotate: [360, 180, 0],
-          scale: [1.1, 1, 1.1]
-        }}
-        transition={{ 
-          repeat: Infinity, 
-          duration: settings.animationSpeed.base - 3, 
-          ease: "easeInOut" 
-        }}
-        className={`absolute top-1/3 right-20 w-24 h-24 bg-gradient-to-br ${colors.shape2} rounded-full backdrop-blur-sm`}
-      />
+      {/* Animated Shapes */}
+      {shapes.map((shape) => {
+        const variants = getAnimationVariants(shape);
+        
+        return (
+          <motion.div
+            key={shape.id}
+            {...variants}
+            className={`absolute bg-gradient-to-br ${shape.color} backdrop-blur-sm`}
+            style={{
+              top: shape.top,
+              left: shape.left,
+              width: `${shape.size}px`,
+              height: `${shape.size}px`,
+              borderRadius: shape.borderRadius,
+              opacity: shape.opacity,
+            }}
+          />
+        );
+      })}
       
-      <motion.div
-        animate={{ 
-          x: [-30, 30, -30],
-          rotate: [0, 45, 90],
-        }}
-        transition={{ 
-          repeat: Infinity, 
-          duration: settings.animationSpeed.base + 3, 
-          ease: "easeInOut" 
-        }}
-        className={`absolute bottom-20 left-1/4 w-16 h-16 bg-gradient-to-br ${colors.shape3} transform rotate-45 backdrop-blur-sm`}
-      />
-
-      {/* Medium Shapes */}
-      <motion.div
-        animate={{ 
-          x: [30, -30, 30],
-          y: [10, -10, 10],
-          rotate: [0, 90, 180, 270, 360],
-        }}
-        transition={{ 
-          repeat: Infinity, 
-          duration: settings.animationSpeed.base + 5, 
-          ease: "easeInOut" 
-        }}
-        className={`absolute top-1/2 left-1/3 w-20 h-20 bg-gradient-to-br ${colors.shape1} rounded-2xl backdrop-blur-sm`}
-      />
-
-      <motion.div
-        animate={{ 
-          y: [-40, 40, -40],
-          x: [20, -20, 20],
-          scale: [0.8, 1.2, 0.8]
-        }}
-        transition={{ 
-          repeat: Infinity, 
-          duration: settings.animationSpeed.base + 2, 
-          ease: "easeInOut" 
-        }}
-        className={`absolute bottom-1/3 right-1/3 w-28 h-28 bg-gradient-to-br ${colors.shape2} rounded-full backdrop-blur-sm`}
-      />
-
-      {/* Small Decorative Elements */}
-      {/* <motion.div
-        animate={{ 
-          rotate: [0, 360],
-          scale: [1, 1.3, 1]
-        }}
-        transition={{ 
-          repeat: Infinity, 
-          duration: settings.animationSpeed.base - 5, 
-          ease: "linear" 
-        }}
-        className={`absolute top-1/4 left-1/2 w-12 h-12 bg-gradient-to-br ${colors.shape3} rounded-xl backdrop-blur-sm`}
-      /> */}
-
-      {/* Floating Particles */}
-      {/* {[...Array(settings.particleCount)].map((_, i) => (
+      {/* Additional Pattern-Specific Elements */}
+      {pattern === "wave" && (
         <motion.div
-          key={i}
           animate={{
-            y: [-100, -200, -100],
-            x: [0, Math.sin(i) * 50, 0],
-            opacity: [0, 1, 0],
-            scale: [0, 1, 0]
+            background: [
+              "linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent)",
+              "linear-gradient(180deg, transparent, rgba(147, 51, 234, 0.1), transparent)",
+              "linear-gradient(270deg, transparent, rgba(236, 72, 153, 0.1), transparent)",
+              "linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent)",
+            ],
           }}
           transition={{
             repeat: Infinity,
-            duration: 8 + i * settings.animationSpeed.modifier,
-            delay: i * 1.5,
-            ease: "easeInOut"
+            duration: 15 * getSpeedMultiplier,
+            ease: easeOut,
           }}
-          className={`absolute w-2 h-2 bg-gradient-to-r ${colors.particles} rounded-full`}
-          style={{
-            left: `${20 + i * (60 / settings.particleCount)}%`,
-            bottom: '10%'
-          }}
+          className="absolute inset-0"
         />
-      ))} */}
-
-      {/* Subtle Gradient Overlays */}
-      {/* <motion.div
-        animate={{ 
-          opacity: [0.1, 0.3, 0.1],
-          scale: [1, 1.1, 1]
-        }}
-        transition={{ 
-          repeat: Infinity, 
-          duration: settings.animationSpeed.base + 10, 
-          ease: "easeInOut" 
-        }}
-        className={`absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-to-bl ${colors.shape1.replace('/20', settings.opacity)} rounded-full blur-3xl`}
-      />
-
-      <motion.div
-        animate={{ 
-          opacity: [0.2, 0.4, 0.2],
-          scale: [1.1, 1, 1.1]
-        }}
-        transition={{ 
-          repeat: Infinity, 
-          duration: settings.animationSpeed.base + 8, 
-          ease: "easeInOut" 
-        }}
-        className={`absolute bottom-0 left-0 w-1/3 h-1/3 bg-gradient-to-tr ${colors.shape2.replace('/20', settings.opacity)} rounded-full blur-2xl`}
-      /> */}
-
-      {/* Additional Morphing Shapes */}
-      <motion.div
-        animate={{
-          borderRadius: ["30% 70% 70% 30% / 30% 30% 70% 70%", 
-                       "70% 30% 30% 70% / 70% 70% 30% 30%",
-                       "30% 70% 70% 30% / 30% 30% 70% 70%"],
-          rotate: [0, 120, 240, 360],
-          scale: [1, 1.2, 1]
-        }}
-        transition={{
-          repeat: Infinity,
-          duration: settings.animationSpeed.base + 12,
-          ease: "easeInOut"
-        }}
-        className={`absolute top-3/4 left-3/4 w-24 h-24 bg-gradient-to-br ${colors.shape3} backdrop-blur-sm`}
-      />
-
-      {/* Pulsing Dots */}
-      {/* {[...Array(4)].map((_, i) => (
-        <motion.div
-          key={`dot-${i}`}
-          animate={{
-            scale: [0, 1.5, 0],
-            opacity: [0, 0.6, 0]
-          }}
-          transition={{
-            repeat: Infinity,
-            duration: 4,
-            delay: i * 1,
-            ease: "easeInOut"
-          }}
-          className={`absolute w-3 h-3 bg-gradient-to-r ${colors.particles} rounded-full`}
-          style={{
-            top: `${25 + i * 20}%`,
-            right: `${15 + i * 10}%`
-          }}
-        />
-      ))} */}
+      )}
+      
+      {intensity === "heavy" && (
+        <>
+          {/* Additional ambient glow effects for heavy intensity */}
+          <motion.div
+            animate={{
+              opacity: [0.1, 0.3, 0.1],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 20 * getSpeedMultiplier,
+              ease: easeInOut,
+            }}
+            className="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-to-bl from-blue-400/10 to-purple-400/10 rounded-full blur-3xl"
+          />
+          
+          <motion.div
+            animate={{
+              opacity: [0.2, 0.4, 0.2],
+              scale: [1.1, 1, 1.1],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 25 * getSpeedMultiplier,
+              ease: easeInOut,
+            }}
+            className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-gradient-to-tr from-purple-400/15 to-pink-400/15 rounded-full blur-2xl"
+          />
+        </>
+      )}
     </div>
   );
-};
-
-export default AnimatedBackground;
+}
