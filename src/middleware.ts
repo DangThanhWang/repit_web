@@ -50,19 +50,7 @@ export default withAuth(
   },
   {
     callbacks: {
-      // 🚀 Optimize auth check - only for protected routes
-      authorized: ({ token, req }) => {
-        const { pathname } = req.nextUrl;
-        
-        // Public routes
-        const publicRoutes = ['/', '/auth/login', '/auth/register', '/about', '/contact'];
-        if (publicRoutes.includes(pathname)) {
-          return true;
-        }
-        
-        // Protected routes require token
-        return !!token;
-      },
+      authorized: () => true,
     },
   }
 );
