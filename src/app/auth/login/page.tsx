@@ -48,9 +48,7 @@ export default function LoginPage() {
         setError("Invalid email or password");
       } else if (result?.ok) {
         // Refresh the session and redirect
-        await getSession();
-        router.push("/dashboard");
-        router.refresh();
+        window.location.href = "/dashboard";
       }
     } catch (error) {
       setError("An unexpected error occurred. Please try again.");
