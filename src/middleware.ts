@@ -1,26 +1,26 @@
-// middleware.ts - Performance optimization
+// src/middleware.ts - Updated for Next.js 15
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// 🚀 Cache headers for static assets
+// Static assets extensions
 const staticAssets = ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2'];
 
 function isStaticAsset(pathname: string) {
   return staticAssets.some(ext => pathname.endsWith(ext));
 }
 
-// 🚀 Performance middleware
+// Performance middleware
 export default withAuth(
   function middleware(req: NextRequest) {
     const response = NextResponse.next();
     
-    // 🚀 Add performance headers
+    // Security headers
     response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     
-    // 🚀 Cache static assets
+    // Cache static assets
     if (isStaticAsset(req.nextUrl.pathname)) {
       response.headers.set(
         'Cache-Control',
@@ -28,7 +28,7 @@ export default withAuth(
       );
     }
     
-    // 🚀 Cache API routes with shorter TTL
+    // Cache API routes with shorter TTL
     if (req.nextUrl.pathname.startsWith('/api/')) {
       // Don't cache auth endpoints
       if (req.nextUrl.pathname.includes('/auth/')) {
@@ -38,7 +38,7 @@ export default withAuth(
       }
     }
     
-    // 🚀 Preload critical resources
+    // Preload critical resources
     if (req.nextUrl.pathname === '/dashboard') {
       response.headers.set(
         'Link',
@@ -50,20 +50,36 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: () => true,
+      authorized: ({ token, req }) => {
+        // Protected routes that require authentication
+        const protectedPaths = ['/dashboard', '/flashcards', '/classes', '/profile'];
+        const isProtectedPath = protectedPaths.some(path => 
+          req.nextUrl.pathname.startsWith(path)
+        );
+        
+        // If it's a protected path, require token
+        if (isProtectedPath) {
+          return !!token;
+        }
+        
+        // Allow all other paths
+        return true;
+      },
     },
   }
 );
 
-// 🚀 Configure matcher for performance
+// Configure matcher for better performance - only run on routes that need middleware
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
+     * - api/auth (NextAuth.js routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - public folder files
      */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

@@ -1,96 +1,103 @@
-import { prisma } from "@/lib/prisma";
+// src/app/(main)/flashcards/page.tsx
 import { getServerSession } from "next-auth";
+import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { BookOpen, ArrowRight } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { redirect } from "next/navigation";
+import FlashcardList from "@/components/flashcards/FlashcardList";
+import AnimatedBackground from "@/components/common/AnimatedBackground";
+
+export const metadata = {
+  title: "My Flashcards - REPIT",
+  description: "Manage your flashcard collections and track learning progress",
+};
 
 export default async function FlashcardsPage() {
   const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    redirect('/auth/login');
+  }
 
-  if (!session?.user?.email) {
+  const userId = session.user.id;
+
+  try {
+    // Fetch user's flashcard sets with stats
+    const flashcardSets = await prisma.flashcardSet.findMany({
+      where: { userId },
+      include: {
+        flashcards: {
+          select: { id: true }
+        },
+        progresses: {
+          where: { userId },
+          select: { learned: true }
+        }
+      },
+      orderBy: { updatedAt: "desc" }
+    });
+
+    // Transform data for component
+    const sets = flashcardSets.map((set) => ({
+      id: set.id,
+      title: set.title,
+      description: set.description,
+      cards: set.flashcards.length,
+      progress: set.flashcards.length > 0 
+        ? Math.round((set.progresses[0]?.learned || 0) / set.flashcards.length * 100)
+        : 0,
+      createdAt: set.createdAt,
+      updatedAt: set.updatedAt
+    }));
+
+    // Get user stats
+    const totalCards = sets.reduce((sum, set) => sum + set.cards, 0);
+    const totalLearned = sets.reduce((sum, set) => sum + Math.round(set.cards * set.progress / 100), 0);
+    const averageProgress = sets.length > 0 
+      ? Math.round(sets.reduce((sum, set) => sum + set.progress, 0) / sets.length)
+      : 0;
+
+    const userStats = {
+      totalSets: sets.length,
+      totalCards,
+      totalLearned,
+      averageProgress
+    };
+
     return (
-      <div className="max-w-2xl mx-auto p-8 text-center">
-        <h1 className="text-2xl font-bold mb-4">Danh sách Flashcards</h1>
-        <p className="text-slate-600 mb-6">
-          Bạn cần đăng nhập để xem các bộ flashcard của mình.
-        </p>
-        <Link href="/auth/login">
-          <Button>Đăng nhập</Button>
-        </Link>
+      <div className="relative min-h-screen">
+        <AnimatedBackground variant="blue" intensity="light" />
+        
+        <main className="relative z-10 container mx-auto px-6 lg:px-8 py-12">
+          <FlashcardList 
+            sets={sets} 
+            userStats={userStats}
+            userName={session.user.name || "Learner"}
+          />
+        </main>
+      </div>
+    );
+
+  } catch (error) {
+    console.error('Error fetching flashcard sets:', error);
+    
+    return (
+      <div className="relative min-h-screen flex items-center justify-center">
+        <AnimatedBackground variant="sunset" intensity="light" />
+        <div className="relative z-10 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Something went wrong
+          </h1>
+          <p className="text-gray-600 mb-6">
+            We couldn't load your flashcard sets. Please try again later.
+          </p>
+          <a 
+            href="/flashcards" 
+            className="text-blue-600 hover:text-blue-800 font-medium"
+          >
+            Retry
+          </a>
+        </div>
       </div>
     );
   }
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    include: {
-      flashcardSets: {
-        orderBy: { createdAt: "desc" },
-      },
-    },
-  });
-
-  const sets = user?.flashcardSets ?? [];
-
-  return (
-    <div className="max-w-4xl mx-auto p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Tất cả Flashcards của bạn</h1>
-        <Link href="/flashcards/new">
-          <Button>
-            <BookOpen className="w-4 h-4 mr-2" />
-            Tạo bộ mới
-          </Button>
-        </Link>
-      </div>
-
-      {sets.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-slate-600 mb-4">
-            Bạn chưa có bộ flashcard nào. Hãy tạo bộ đầu tiên!
-          </p>
-          <Link href="/flashcards/new">
-            <Button>
-              <BookOpen className="w-4 h-4 mr-2" />
-              Tạo flashcard set
-            </Button>
-          </Link>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {sets.map((set) => {
-            const percentage = set.cardCount === 0
-              ? 0
-              : Math.round((set.progress / 100) * 100);
-
-            return (
-              <Link
-                key={set.id}
-                href={`/flashcards/${set.id}`}
-                className="block border border-slate-200 rounded-xl p-5 hover:shadow transition"
-              >
-                <h2 className="text-xl font-semibold mb-1">{set.title}</h2>
-                {set.description && (
-                  <p className="text-slate-600 text-sm mb-3">{set.description}</p>
-                )}
-                <p className="text-slate-500 text-sm mb-3">
-                  {set.cardCount} thẻ
-                </p>
-                <Progress value={percentage} />
-                <div className="mt-2 text-sm text-slate-600">
-                  Tiến độ: {percentage}%
-                </div>
-                <div className="mt-3 flex items-center text-blue-600 font-medium text-sm">
-                  Xem chi tiết
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
 }

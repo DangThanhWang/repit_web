@@ -1,3 +1,4 @@
+// prisma/schema.prisma - Updated version
 generator client {
   provider = "prisma-client-js"
 }
@@ -22,6 +23,8 @@ model User {
   flashcardSets     FlashcardSet[]
   flashcardProgress FlashcardProgress[]
   memberships       Membership[]
+
+  @@map("users")
 }
 
 model Account {
@@ -38,9 +41,10 @@ model Account {
   id_token          String?
   session_state     String?
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@map("accounts")
 }
 
 model Session {
@@ -49,7 +53,9 @@ model Session {
   userId       String
   expires      DateTime
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
 }
 
 model VerificationToken {
@@ -58,6 +64,7 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+  @@map("verification_tokens")
 }
 
 model FlashcardSet {
@@ -69,9 +76,15 @@ model FlashcardSet {
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   userId      String
-  user        User                @relation(fields: [userId], references: [id])
+  
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   flashcards  Flashcard[]
   progresses  FlashcardProgress[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("flashcard_sets")
 }
 
 model Flashcard {
@@ -81,7 +94,11 @@ model Flashcard {
   example   String?
   createdAt DateTime     @default(now())
   setId     String
-  set       FlashcardSet @relation(fields: [setId], references: [id])
+  
+  set       FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@index([setId])
+  @@map("flashcards")
 }
 
 model FlashcardProgress {
@@ -91,10 +108,13 @@ model FlashcardProgress {
   learned      Int      @default(0)
   lastReviewed DateTime @default(now())
 
-  user User         @relation(fields: [userId], references: [id])
-  set  FlashcardSet @relation(fields: [setId], references: [id])
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  set  FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
 
   @@unique([userId, setId])
+  @@index([userId])
+  @@index([setId])
+  @@map("flashcard_progress")
 }
 
 model Course {
@@ -104,6 +124,8 @@ model Course {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   memberships Membership[]
+
+  @@map("courses")
 }
 
 model Membership {
@@ -113,8 +135,11 @@ model Membership {
   role      String   @default("member")
   joinedAt  DateTime @default(now())
 
-  user   User   @relation(fields: [userId], references: [id])
-  course Course @relation(fields: [courseId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@map("memberships")
 }
