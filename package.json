@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "prisma generate && next build --no-lint",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "perf:check": "tsx scripts/performance-check.ts",
+    "perf:build": "ANALYZE=true npm run build",
+    "db:optimize": "prisma db push --force-reset && tsx prisma/seed.ts",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
