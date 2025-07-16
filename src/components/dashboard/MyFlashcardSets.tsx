@@ -200,7 +200,7 @@ export default function MyFlashcardSets({
 
 
                       {/* Progress Ring Indicator */}
-                      <div className="absolute top-6 right-6 group-hover:opacity-0">
+                      {/* <div className="absolute top-6 right-6 group-hover:opacity-0">
                         <div className="w-10 h-10 relative">
                           <svg className="w-10 h-10 transform -rotate-90" viewBox="0 0 40 40">
                             <circle
@@ -234,7 +234,7 @@ export default function MyFlashcardSets({
                             <span className="text-xs font-bold text-slate-700">{set.progress}%</span>
                           </div>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                   </motion.div>
                 ))}
