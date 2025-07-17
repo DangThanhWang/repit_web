@@ -164,12 +164,12 @@ export default function FlashcardSetDetail({ flashcardSet, userName }: Flashcard
                 <div className="flex flex-wrap items-center gap-6 mt-6 text-white/70">
                   <span className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    Created {new Date(flashcardSet.createdAt).toISOString().split("T")[0]}
+                    Created {new Date(flashcardSet.createdAt).toLocaleDateString()}
                   </span>
                   {flashcardSet.lastReviewed && (
                     <span className="flex items-center gap-2">
                       <Clock className="w-4 h-4" />
-                      Last studied {new Date(flashcardSet.lastReviewed).toISOString().split("T")[0]}
+                      Last studied {new Date(flashcardSet.lastReviewed).toLocaleDateString()}
                     </span>
                   )}
                 </div>
@@ -264,10 +264,10 @@ export default function FlashcardSetDetail({ flashcardSet, userName }: Flashcard
           </Button>
         </Link>
 
-        <Link href={`/flashcards/${flashcardSet.id}/study`}>
-          <Button className="group bg-gradient-to-br from-amber-500 to-amber-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl">
-            <PlayCircle className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform duration-300" />
-            Start Quiz
+        <Link href={`/flashcards/${flashcardSet.id}/quiz`}>
+          <Button className="group bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl">
+            <Target className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform duration-300" />
+            Take Quiz
           </Button>
         </Link>
         

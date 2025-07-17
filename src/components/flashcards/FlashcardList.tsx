@@ -133,7 +133,7 @@ export default function FlashcardList({ sets, userStats, userName }: FlashcardLi
           variants={fadeInUp}
           className="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-12"
         >
-          <div className="bg-white/80 backdrop-blur-sm border border-white/40 rounded-2xl p-6 shadow-lg">
+          <div className="bg-white/60 backdrop-blur-sm border border-white/40 rounded-2xl p-6 shadow-lg">
             <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl mx-auto mb-3">
               <BookOpen className="w-6 h-6 text-white" />
             </div>
@@ -141,7 +141,7 @@ export default function FlashcardList({ sets, userStats, userName }: FlashcardLi
             <p className="text-sm text-slate-600">Total Sets</p>
           </div>
           
-          <div className="bg-white/80 backdrop-blur-sm border border-white/40 rounded-2xl p-6 shadow-lg">
+          <div className="bg-white/60 backdrop-blur-sm border border-white/40 rounded-2xl p-6 shadow-lg">
             <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl mx-auto mb-3">
               <Target className="w-6 h-6 text-white" />
             </div>
@@ -149,7 +149,7 @@ export default function FlashcardList({ sets, userStats, userName }: FlashcardLi
             <p className="text-sm text-slate-600">Total Cards</p>
           </div>
           
-          <div className="bg-white/80 backdrop-blur-sm border border-white/40 rounded-2xl p-6 shadow-lg">
+          <div className="bg-white/60 backdrop-blur-sm border border-white/40 rounded-2xl p-6 shadow-lg">
             <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl mx-auto mb-3">
               <Award className="w-6 h-6 text-white" />
             </div>
@@ -157,7 +157,7 @@ export default function FlashcardList({ sets, userStats, userName }: FlashcardLi
             <p className="text-sm text-slate-600">Cards Learned</p>
           </div>
           
-          <div className="bg-white/80 backdrop-blur-sm border border-white/40 rounded-2xl p-6 shadow-lg">
+          <div className="bg-white/60 backdrop-blur-sm border border-white/40 rounded-2xl p-6 shadow-lg">
             <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl mx-auto mb-3">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
@@ -183,14 +183,14 @@ export default function FlashcardList({ sets, userStats, userName }: FlashcardLi
               placeholder="Search flashcard sets..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-3 bg-white/80 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-full sm:w-80"
+              className="pl-10 pr-4 py-3 bg-white/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-full sm:w-80"
             />
           </div>
           
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-4 py-3 bg-white/80 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+            className="px-4 py-3 bg-white/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
           >
             <option value="recent">Most Recent</option>
             <option value="progress">Highest Progress</option>
@@ -256,7 +256,7 @@ export default function FlashcardList({ sets, userStats, userName }: FlashcardLi
               }}
               className="group relative"
             >
-              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 border border-white/40 shadow-lg hover:shadow-xl transition-all duration-300 h-full">
+              <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 border border-white/40 shadow-lg hover:shadow-xl transition-all duration-300 h-full">
                 {/* Set Header */}
                 <div className="flex items-start justify-between mb-6">
                   <div className="flex-1">
@@ -266,7 +266,7 @@ export default function FlashcardList({ sets, userStats, userName }: FlashcardLi
                       </h3>
                     </Link>
                     {set.description && (
-                      <p className="text-sm text-slate-600 mb-3 line-clamp-2 min-h-[48px]">
+                      <p className="text-sm text-slate-600 mb-3 line-clamp-2">
                         {set.description}
                       </p>
                     )}
@@ -277,7 +277,7 @@ export default function FlashcardList({ sets, userStats, userName }: FlashcardLi
                       </span>
                       <span className="flex items-center space-x-1">
                         <Clock className="w-4 h-4" />
-                        <span>{new Date(set.updatedAt).toISOString().split("T")[0]}</span>
+                        <span>{new Date(set.updatedAt).toLocaleDateString()}</span>
                       </span>
                     </div>
                   </div>

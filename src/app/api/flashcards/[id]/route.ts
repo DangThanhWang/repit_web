@@ -124,7 +124,7 @@ export async function PUT(
     const userId = session.user.id;
     const body = await req.json();
 
-    const { title, description } = body;
+    const { title, description, newCards, updatedCards, deletedCards } = body;
 
     if (!title || title.trim().length === 0) {
       return NextResponse.json(
@@ -148,22 +148,69 @@ export async function PUT(
       );
     }
 
-    // Update the flashcard set
-    const updatedSet = await prisma.flashcardSet.update({
-      where: {
-        id: setId
-      },
-      data: {
-        title: title.trim(),
-        description: description?.trim() || null,
-        updatedAt: new Date()
-      },
-      include: {
-        flashcards: true
+    // Perform updates in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Delete specified flashcards
+      if (deletedCards && deletedCards.length > 0) {
+        await tx.flashcard.deleteMany({
+          where: {
+            id: { in: deletedCards },
+            setId: setId
+          }
+        });
       }
+
+      // 2. Update existing flashcards
+      if (updatedCards && updatedCards.length > 0) {
+        for (const card of updatedCards) {
+          await tx.flashcard.update({
+            where: { 
+              id: card.id,
+              setId: setId // Ensure card belongs to this set
+            },
+            data: {
+              question: card.question.trim(),
+              answer: card.answer.trim(),
+              example: card.example?.trim() || null
+            }
+          });
+        }
+      }
+
+      // 3. Create new flashcards
+      if (newCards && newCards.length > 0) {
+        await tx.flashcard.createMany({
+          data: newCards.map((card: any) => ({
+            setId: setId,
+            question: card.question.trim(),
+            answer: card.answer.trim(),
+            example: card.example?.trim() || null
+          }))
+        });
+      }
+
+      // 4. Update the flashcard set info and card count
+      const totalCards = await tx.flashcard.count({
+        where: { setId }
+      });
+
+      const updatedSet = await tx.flashcardSet.update({
+        where: { id: setId },
+        data: {
+          title: title.trim(),
+          description: description?.trim() || null,
+          cardCount: totalCards,
+          updatedAt: new Date()
+        },
+        include: {
+          flashcards: true
+        }
+      });
+
+      return updatedSet;
     });
 
-    return NextResponse.json(updatedSet);
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Error updating flashcard set:", error);
     return NextResponse.json(
