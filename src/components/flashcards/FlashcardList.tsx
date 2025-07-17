@@ -117,16 +117,29 @@ export default function FlashcardList({ sets, userStats, userName }: FlashcardLi
         variants={staggerContainer}
         className="text-center"
       >
-        <motion.div variants={fadeInUp}>
-          <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+        <motion.div variants={fadeInUp} className="relative">
+          <div className="absolute inset-0 flex justify-center">
+            <div className="w-60 h-20 bg-blue-300/30 blur-2xl rounded-full animate-pulse" />
+          </div>
+
+          <h1 className="relative text-4xl lg:text-6xl font-bold mb-6 flex items-center justify-center gap-3">
+            <motion.span
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ repeat: Infinity, duration: 3 }}
+              className="inline-block"
+            >
+              📚
+            </motion.span>
+            <span className="bg-gradient-to-r from-indigo-600 via-blue-500 to-sky-400 bg-[length:200%] bg-clip-text text-transparent animate-shine">
               My Flashcard Library
             </span>
           </h1>
-          <p className="text-xl text-slate-600/90 max-w-3xl mx-auto leading-relaxed">
+
+          <p className="text-xl text-slate-600/90 max-w-3xl mx-auto leading-relaxed relative z-10">
             Welcome back, {userName}! Continue your learning journey.
           </p>
         </motion.div>
+
 
         {/* Stats Overview */}
         <motion.div 
@@ -277,7 +290,7 @@ export default function FlashcardList({ sets, userStats, userName }: FlashcardLi
                       </span>
                       <span className="flex items-center space-x-1">
                         <Clock className="w-4 h-4" />
-                        <span>{new Date(set.updatedAt).toLocaleDateString()}</span>
+                        <span>{new Date(set.updatedAt).toISOString().split("T")[0]}</span>
                       </span>
                     </div>
                   </div>

@@ -284,7 +284,7 @@ export default function FlashcardStudyMode({ flashcardSet, userId }: FlashcardSt
               transition={{ duration: 0.3 }}
               className="relative"
             >
-              <div className="bg-white/60 backdrop-blur-sm border border-white/40 rounded-3xl p-8 lg:p-12 shadow-2xl">
+              <div className="bg-white/60 backdrop-blur-sm border border-white/40 rounded-3xl p-8 lg:p-12 shadow-2xl ">
                 {/* Card Number */}
                 <div className="flex items-center justify-between mb-8">
                   <div className="px-4 py-2 bg-blue-100 rounded-full">
