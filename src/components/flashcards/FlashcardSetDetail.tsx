@@ -263,6 +263,13 @@ export default function FlashcardSetDetail({ flashcardSet, userName }: Flashcard
             Start Studying
           </Button>
         </Link>
+
+        <Link href={`/flashcards/${flashcardSet.id}/study`}>
+          <Button className="group bg-gradient-to-br from-amber-500 to-amber-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl">
+            <PlayCircle className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform duration-300" />
+            Start Quiz
+          </Button>
+        </Link>
         
         <Link href={`/flashcards/${flashcardSet.id}/edit`}>
           <Button variant="outline" className="px-6 py-3 rounded-xl border-slate-300 hover:bg-slate-50 font-semibold transition-all duration-300">
