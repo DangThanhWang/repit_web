@@ -1,4 +1,4 @@
-// prisma/schema.prisma - Updated version
+// prisma/schema.prisma - Thay thế toàn bộ file
 generator client {
   provider = "prisma-client-js"
 }
@@ -24,6 +24,8 @@ model User {
   flashcardProgress FlashcardProgress[]
   memberships       Membership[]
 
+  @@index([email])
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -44,6 +46,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
   @@map("accounts")
 }
 
@@ -55,6 +58,7 @@ model Session {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("sessions")
 }
 
@@ -82,8 +86,9 @@ model FlashcardSet {
   progresses  FlashcardProgress[]
 
   @@index([userId])
+  @@index([userId, updatedAt])
+  @@index([userId, createdAt])
   @@index([createdAt])
-  @@index([updatedAt])
   @@map("flashcard_sets")
 }
 
@@ -98,6 +103,7 @@ model Flashcard {
   set       FlashcardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
 
   @@index([setId])
+  @@index([createdAt])
   @@map("flashcards")
 }
 
@@ -113,6 +119,7 @@ model FlashcardProgress {
 
   @@unique([userId, setId])
   @@index([userId])
+  @@index([userId, lastReviewed])
   @@index([setId])
   @@map("flashcard_progress")
 }
@@ -125,6 +132,7 @@ model Course {
   updatedAt   DateTime     @updatedAt
   memberships Membership[]
 
+  @@index([createdAt])
   @@map("courses")
 }
 
@@ -141,5 +149,6 @@ model Membership {
   @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
+  @@index([joinedAt])
   @@map("memberships")
 }

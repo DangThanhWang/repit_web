@@ -1,10 +1,11 @@
-// src/app/api/flashcards/route.ts
+// src/app/api/flashcards/route.ts - Thay thế toàn bộ file
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 
-// POST - Create a new flashcard set
+const CACHE_DURATION = 300; // 5 minutes
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -20,7 +21,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { title, description, flashcards } = body;
 
-    // Validation
     if (!title || title.trim().length === 0) {
       return NextResponse.json(
         { error: "Title is required" },
@@ -35,7 +35,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate flashcards
     for (const card of flashcards) {
       if (!card.question || !card.answer || 
           card.question.trim().length === 0 || 
@@ -47,9 +46,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Create the flashcard set with flashcards in a transaction
+    // ✅ Single transaction - no separate queries
     const result = await prisma.$transaction(async (tx) => {
-      // Create the flashcard set
       const newSet = await tx.flashcardSet.create({
         data: {
           title: title.trim(),
@@ -64,12 +62,14 @@ export async function POST(req: NextRequest) {
             }))
           }
         },
-        include: {
-          flashcards: true
+        select: {
+          id: true,
+          title: true,
+          cardCount: true,
+          createdAt: true
         }
       });
 
-      // Create initial progress record
       await tx.flashcardProgress.create({
         data: {
           userId: userId,
@@ -91,7 +91,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET - Fetch all flashcard sets for the user
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -105,14 +104,14 @@ export async function GET(req: NextRequest) {
 
     const userId = session.user.id;
     const { searchParams } = new URL(req.url);
+    
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "10"), 50);
     const search = searchParams.get("search");
     const sortBy = searchParams.get("sortBy") || "recent";
 
     const skip = (page - 1) * limit;
 
-    // Build where clause
     const where: any = { userId };
     if (search) {
       where.OR = [
@@ -121,7 +120,6 @@ export async function GET(req: NextRequest) {
       ];
     }
 
-    // Build orderBy clause
     let orderBy: any = { updatedAt: "desc" };
     switch (sortBy) {
       case "progress":
@@ -137,13 +135,11 @@ export async function GET(req: NextRequest) {
         orderBy = { updatedAt: "desc" };
     }
 
+    // ✅ Single query with include - no N+1
     const [flashcardSets, total] = await Promise.all([
       prisma.flashcardSet.findMany({
         where,
         include: {
-          flashcards: {
-            select: { id: true }
-          },
           progresses: {
             where: { userId },
             select: { learned: true }
@@ -156,20 +152,19 @@ export async function GET(req: NextRequest) {
       prisma.flashcardSet.count({ where })
     ]);
 
-    // Transform data
     const sets = flashcardSets.map((set) => ({
       id: set.id,
       title: set.title,
       description: set.description,
-      cards: set.flashcards.length,
-      progress: set.flashcards.length > 0 
-        ? Math.round((set.progresses[0]?.learned || 0) / set.flashcards.length * 100)
+      cards: set.cardCount,
+      progress: set.cardCount > 0 
+        ? Math.round((set.progresses[0]?.learned || 0) / set.cardCount * 100)
         : 0,
       createdAt: set.createdAt,
       updatedAt: set.updatedAt
     }));
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       sets,
       pagination: {
         page,
@@ -178,6 +173,12 @@ export async function GET(req: NextRequest) {
         totalPages: Math.ceil(total / limit)
       }
     });
+
+    // ✅ Add proper cache headers
+    response.headers.set('Cache-Control', `public, max-age=${CACHE_DURATION}, s-maxage=${CACHE_DURATION}`);
+    response.headers.set('ETag', `"${userId}-${page}-${limit}-${sortBy}"`);
+
+    return response;
   } catch (error) {
     console.error("Error fetching flashcard sets:", error);
     return NextResponse.json(

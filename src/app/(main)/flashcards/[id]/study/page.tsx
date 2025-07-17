@@ -1,4 +1,4 @@
-// src/app/(main)/flashcards/[id]/study/page.tsx
+// src/app/(main)/flashcards/[id]/study/page.tsx - Thay thế toàn bộ file
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
@@ -21,7 +21,7 @@ export default async function StudyPage({ params }: StudyPageProps) {
   const userId = session.user.id;
 
   try {
-    // Fetch flashcard set with flashcards
+    // ✅ SINGLE OPTIMIZED QUERY - All data in one query
     const flashcardSet = await prisma.flashcardSet.findFirst({
       where: {
         id,

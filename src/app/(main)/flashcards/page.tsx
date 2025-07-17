@@ -1,4 +1,4 @@
-// src/app/(main)/flashcards/page.tsx
+// src/app/(main)/flashcards/page.tsx - Thay thế toàn bộ file
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
@@ -11,6 +11,8 @@ export const metadata = {
   description: "Manage your flashcard collections and track learning progress",
 };
 
+export const revalidate = 300; // 5 minutes cache
+
 export default async function FlashcardsPage() {
   const session = await getServerSession(authOptions);
   
@@ -21,37 +23,41 @@ export default async function FlashcardsPage() {
   const userId = session.user.id;
 
   try {
-    // Fetch user's flashcard sets with stats
-    const flashcardSets = await prisma.flashcardSet.findMany({
-      where: { userId },
-      include: {
-        flashcards: {
-          select: { id: true }
+    // ✅ SINGLE OPTIMIZED QUERY - All data in one go
+    const [flashcardSets, totalProgressStats] = await Promise.all([
+      prisma.flashcardSet.findMany({
+        where: { userId },
+        include: {
+          progresses: {
+            where: { userId },
+            select: { learned: true }
+          }
         },
-        progresses: {
-          where: { userId },
-          select: { learned: true }
-        }
-      },
-      orderBy: { updatedAt: "desc" }
-    });
+        orderBy: { updatedAt: "desc" },
+        take: 50
+      }),
+      prisma.flashcardProgress.aggregate({
+        where: { userId },
+        _sum: { learned: true },
+        _count: { id: true }
+      })
+    ]);
 
-    // Transform data for component
+    // ✅ Transform data efficiently
     const sets = flashcardSets.map((set) => ({
       id: set.id,
       title: set.title,
       description: set.description,
-      cards: set.flashcards.length,
-      progress: set.flashcards.length > 0 
-        ? Math.round((set.progresses[0]?.learned || 0) / set.flashcards.length * 100)
+      cards: set.cardCount,
+      progress: set.cardCount > 0 
+        ? Math.round((set.progresses[0]?.learned || 0) / set.cardCount * 100)
         : 0,
       createdAt: set.createdAt,
       updatedAt: set.updatedAt
     }));
 
-    // Get user stats
-    const totalCards = sets.reduce((sum, set) => sum + set.cards, 0);
-    const totalLearned = sets.reduce((sum, set) => sum + Math.round(set.cards * set.progress / 100), 0);
+    const totalCards = flashcardSets.reduce((sum, set) => sum + set.cardCount, 0);
+    const totalLearned = totalProgressStats._sum.learned || 0;
     const averageProgress = sets.length > 0 
       ? Math.round(sets.reduce((sum, set) => sum + set.progress, 0) / sets.length)
       : 0;

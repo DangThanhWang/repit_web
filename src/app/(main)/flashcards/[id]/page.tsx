@@ -1,4 +1,4 @@
-// src/app/(main)/flashcards/[id]/page.tsx
+// src/app/(main)/flashcards/[id]/page.tsx - Thay thế toàn bộ file
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
@@ -10,7 +10,6 @@ interface FlashcardDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-// Generate metadata dynamically
 export async function generateMetadata({ params }: FlashcardDetailPageProps) {
   const { id } = await params;
   
@@ -43,11 +42,11 @@ export default async function FlashcardDetailPage({ params }: FlashcardDetailPag
   const userId = session.user.id;
 
   try {
-    // Fetch flashcard set with all flashcards and progress
+    // ✅ SINGLE OPTIMIZED QUERY - All data in one query
     const flashcardSet = await prisma.flashcardSet.findFirst({
       where: {
         id,
-        userId // Ensure user owns this set
+        userId
       },
       include: {
         flashcards: {
@@ -64,13 +63,12 @@ export default async function FlashcardDetailPage({ params }: FlashcardDetailPag
       notFound();
     }
 
-    // Calculate progress
+    // ✅ Transform data efficiently
     const progress = flashcardSet.progresses[0];
     const progressPercentage = flashcardSet.flashcards.length > 0 
       ? Math.round((progress?.learned || 0) / flashcardSet.flashcards.length * 100)
       : 0;
 
-    // Transform data for component
     const setData = {
       id: flashcardSet.id,
       title: flashcardSet.title,

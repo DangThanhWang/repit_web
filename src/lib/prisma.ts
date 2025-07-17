@@ -1,4 +1,4 @@
-// src/lib/prisma.ts - Optimized version
+// src/lib/prisma.ts - Thay thế toàn bộ file
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
@@ -8,41 +8,30 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    // 🚀 Tắt logging trong production
-    log: process.env.NODE_ENV === "development" ? ["query"] : ["error"],
+    log: process.env.NODE_ENV === "development" ? ["error"] : ["error"], // ✅ Disable query logs
     
-    // 🚀 Cấu hình connection pool
     datasources: {
       db: {
         url: process.env.DATABASE_URL,
       },
     },
-    
-    // 🚀 Optimization flags
-    // omit: {
-    //   user: {
-    //     password: true, // Không select password mặc định
-    //   },
-    // },
   });
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
-// 🚀 Connection pool middleware
-prisma.$use(async (params, next) => {
-  const before = Date.now();
-  const result = await next(params);
-  const after = Date.now();
+// ✅ Remove slow query middleware - causes overhead
+// prisma.$use(async (params, next) => {
+//   const before = Date.now();
+//   const result = await next(params);
+//   const after = Date.now();
   
-  // Log slow queries in development
-  if (process.env.NODE_ENV === "development" && after - before > 1000) {
-    console.log(`Slow Query: ${params.model}.${params.action} took ${after - before}ms`);
-  }
+//   if (process.env.NODE_ENV === "development" && after - before > 1000) {
+//     console.log(`Slow Query: ${params.model}.${params.action} took ${after - before}ms`);
+//   }
   
-  return result;
-});
+//   return result;
+// });
 
-// 🚀 Graceful disconnect
 process.on('beforeExit', async () => {
   await prisma.$disconnect();
 });

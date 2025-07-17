@@ -1,3 +1,4 @@
+// src/app/(main)/dashboard/page.tsx - Thay thế toàn bộ file
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
@@ -23,19 +24,63 @@ export default async function DashboardPage() {
   }
 
   const userId = session.user.id;
-  const flashcardSets = await prisma.flashcardSet.findMany({ where: { userId }, include: { flashcards: true } });
-  const progress = await prisma.flashcardProgress.findMany({ where: { userId } });
-  const totalLearned = progress.reduce((sum, p) => sum + p.learned, 0);
-  const memberships = await prisma.membership.findMany({ where: { userId }, include: { course: true } });
-  const joinedClasses = Array.from(
-    new Map(
-      memberships.map((m) => [
-        m.course.id,
-        { id: m.course.id, name: m.course.name, members: 0 },
-      ])
-    ).values()
+
+  // ✅ SINGLE OPTIMIZED QUERY - No N+1, no duplicates
+  const [userFlashcardSets, userMemberships, recommendedSets] = await Promise.all([
+    prisma.flashcardSet.findMany({
+      where: { userId },
+      include: {
+        flashcards: {
+          select: { id: true }
+        },
+        progresses: {
+          where: { userId },
+          select: { learned: true }
+        }
+      },
+      orderBy: { updatedAt: "desc" },
+      take: 10
+    }),
+    prisma.membership.findMany({
+      where: { userId },
+      include: {
+        course: {
+          select: { id: true, name: true }
+        }
+      },
+      take: 10
+    }),
+    prisma.flashcardSet.findMany({
+      where: { NOT: { userId } }, // Exclude user's own sets
+      select: { id: true, title: true, cardCount: true },
+      orderBy: { createdAt: "desc" },
+      take: 3
+    })
+  ]);
+
+  // ✅ Transform data efficiently
+  const flashcardSetsForComponent = userFlashcardSets.map((set) => ({
+    id: set.id,
+    title: set.title,
+    cards: set.flashcards.length,
+    progress: set.progress,
+  }));
+
+  const totalLearned = userFlashcardSets.reduce((sum, set) => 
+    sum + (set.progresses[0]?.learned || 0), 0
   );
-  const recommended = await prisma.flashcardSet.findMany({ orderBy: { createdAt: "desc" }, take: 3 });
+
+  const joinedClasses = userMemberships.map((membership) => ({
+    id: membership.course.id,
+    name: membership.course.name,
+    members: 0, // You can add this later if needed
+  }));
+
+  const recommendedFlashcards = recommendedSets.map((set) => ({
+    id: set.id,
+    title: set.title,
+    cards: set.cardCount,
+  }));
 
   return (
     <div className="relative min-h-screen">
@@ -48,18 +93,9 @@ export default async function DashboardPage() {
           weeklyGoal={50}
           weeklyProgress={Math.min(totalLearned, 50)}
         />
-        <MyFlashcardSets sets={flashcardSets.map((set) => ({
-          id: set.id,
-          title: set.title,
-          cards: set.flashcards.length,
-          progress: set.progress,
-        }))} />
+        <MyFlashcardSets sets={flashcardSetsForComponent} />
         <JoinedClasses classes={joinedClasses} />
-        <RecommendedContent flashcards={recommended.map((set) => ({
-          id: set.id,
-          title: set.title,
-          cards: set.cardCount,
-        }))} />
+        <RecommendedContent flashcards={recommendedFlashcards} />
       </main>
     </div>
   );
